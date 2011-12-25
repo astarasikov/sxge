@@ -9,6 +9,8 @@
 
 namespace vmath {
 
+#define PI (4.0 * std::atan(1.0))
+
 template<class T>
 class vec2 {
 public:
@@ -481,6 +483,28 @@ public:
 	static mat4 identity() {
 		mat4 ret = mat4();
 		ret.data[0] = ret.data[5] = ret.data[10] = ret.data[15] = 1;
+		return ret;
+	}
+
+	static mat4 projection(T fovy, T aspect, T z_near, T z_far) {
+		mat4 ret = new mat4();
+
+		T ymax = z_near * std::tan(fovy * PI / 360.0);
+		T width = 2 * ymax;
+
+		T depth = z_far - z_near;
+		T d = -(z_far + z_near) / depth;
+		T dn = -2 * (z_far * z_near) / depth;
+
+		T w = 2 * z_near / width;
+		T h = w * aspect;
+
+		ret.data[0] = w;
+		ret.data[5] = h;
+		ret.data[10] = d;
+		ret.data[11] = -1;
+		ret.data[14] = dn;
+		
 		return ret;
 	}
 
