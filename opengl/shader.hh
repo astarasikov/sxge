@@ -15,9 +15,43 @@ public:
 		Fragment = (1 << 1),
 	};
 
-	Shader(Shader::ShaderType type) : _shaderType(type),
-		_isCompiled(false) 
-	{
+	Shader(Shader::ShaderType type, std::string fileName) :
+		_shaderType(type), _isCompiled(false) {
+		init(type);
+		compileFromFile(fileName);
+	}
+
+	Shader(Shader::ShaderType type, const char *shaderSource) {
+		init(type);
+		compileFromString(shaderSource);	
+	}
+
+	virtual ~Shader() {
+		glDeleteShader(_shaderID);
+	}
+	
+	Shader::ShaderType shaderType() const {
+		return _shaderType;
+	}
+
+	GLuint shaderID() const {
+		return _shaderID;
+	}
+	
+	bool isCompiled() const {
+		return _isCompiled;
+	}
+
+	char *getSource() const;
+protected:
+	enum ShaderType _shaderType;
+	GLuint _shaderID;
+	bool _isCompiled;
+
+	void init(Shader::ShaderType type) {
+		_shaderType = type;
+		_isCompiled = false;
+		
 		GLenum glShaderType;
 		switch (type) {
 			case Shader::ShaderType::Vertex:
@@ -32,23 +66,7 @@ public:
 			err("failed to create shader");	
 		}
 	}
-
-	virtual ~Shader() {
-		glDeleteShader(_shaderID);
-	}
 	
-	Shader::ShaderType shaderType() const {
-		return _shaderType;
-	}
-
-	GLuint shaderId() const {
-		return _shaderID;
-	}
-	
-	bool isCompiled() const {
-		return _isCompiled;
-	}
-
 	bool compileFromString(const char *src) {
 		if (isCompiled()) {
 			err("shader already compiled");
@@ -77,12 +95,6 @@ public:
 		sxge::FileLoader loader(filename);
 		return compileFromString(loader.getData());
 	}
-
-	char *getSource() const;
-protected:
-	enum ShaderType _shaderType;
-	GLuint _shaderID;
-	bool _isCompiled;
 
 	void logShaderError() {
 		GLint logLen;
