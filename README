@@ -1,0 +1,3 @@
+SXGE (simple cross-platform opengl es engine) is my attempt at implementing a simple game engine in opengl es 2.0 without using deprecated fixed-function call.
+
+Previously I have only written simple demos so this is my first real opengl project. Therefore, code will be ugly, algorithms will be stupid. Since this is an educational project, I will be implementing everything myself as opposed to using ready-made libraries like glm or qt4.
