@@ -2,6 +2,7 @@
 #include "util/log.h"
 #include "math/vmath.hh"
 #include "opengl/shader.hh"
+#include "opengl/program.hh"
 
 int main() {
 	float data[9] = {
@@ -19,7 +20,9 @@ int main() {
 	vmath::mat4f r = m4.transposed() * mid;
 	std::cout << r << std::endl;
 
-	sxge::Shader vsh(sxge::Shader::ShaderType::Vertex);
+	sxge::Shader vsh(sxge::Shader::ShaderType::Vertex, "");
+	sxge::ShaderProgram shp;
+	shp.addShaderFromSource(sxge::Shader::ShaderType::Vertex, "");
 
 	return 0;
 }
