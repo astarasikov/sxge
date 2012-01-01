@@ -1,4 +1,4 @@
-#ifdef __SXGE_OPENGL_SCREEN_HH__
+#ifndef __SXGE_OPENGL_SCREEN_HH__
 #define __SXGE_OPENGL_SCREEN_HH__
 
 namespace sxge {
