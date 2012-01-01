@@ -12,7 +12,8 @@ public:
 		MIDDLE = (1 << 2),
 	} MouseButton;
 
-	virtual ~Screen();
+	virtual ~Screen() {}
+	virtual void init(void) = 0;
 	virtual void keyEvent(char key, bool isDown) = 0;
 	virtual void mouseEvent(unsigned x, unsigned y, MouseButton buttons) = 0;
 	virtual void display(void) = 0;

@@ -2,6 +2,7 @@
 #define __SXGE_OPENGL_WINDOW_EGL_X11_HH__
 
 #include "opengl/gl_common.hh"
+#include "opengl/screen.hh"
 #include "util/log.h"
 #include <cstring>
 
@@ -10,17 +11,6 @@
 #include <X11/keysym.h>
 
 namespace sxge {
-
-void printGLInfo(void) {
-	auto renderer = glGetString(GL_RENDERER);
-	auto vendor = glGetString(GL_VENDOR);
-	auto version = glGetString(GL_VERSION);
-	auto glslVersion = glGetString(GL_SHADING_LANGUAGE_VERSION);
-	printf("OpenGL Vendor %s\n", vendor);
-	printf("OpenGL Renderer %s\n", renderer);
-	printf("OpenGL Version %s\n", version);
-	printf("GLSL Version %s\n", glslVersion);
-}
 
 static EGLConfig MakeEGLConfig(EGLDisplay display) {
 	EGLConfig config;
@@ -50,7 +40,7 @@ static EGLConfig MakeEGLConfig(EGLDisplay display) {
 
 class EGL_X11_Window {
 public:
-	EGL_X11_Window() : window(0) {
+	EGL_X11_Window(sxge::Screen &screen) : window(0), sxgeScreen(screen) {
 		Window root;
 		XVisualInfo *visInfo, visTmp;
 		int numVisuals;
@@ -110,7 +100,7 @@ public:
 
 		XMapWindow(xDisplay, window);
 		XSetStandardProperties(xDisplay, window, "SXGE", "SXGE",
-			None, 0, 0, 0);
+			None, NULL, 0, NULL);
 
 		context = eglCreateContext(eglDisplay, config, 0, 0); 
 		if (EGL_NO_CONTEXT == context) {
@@ -127,13 +117,14 @@ public:
 		if (!eglMakeCurrent(eglDisplay, surface, surface, context)) {
 			err("failed to make surface current");
 		}
-
-		printGLInfo();
-		sleep(1);
+		
+		sxgeScreen.init();
+		eventLoop();
 	}
 	virtual ~EGL_X11_Window() {
 		eglMakeCurrent(eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 		eglDestroyContext(eglDisplay, context);
+		eglDestroySurface(eglDisplay, surface);
 		eglTerminate(eglDisplay);
 		if (window) {
 			XDestroyWindow(xDisplay, window);
@@ -148,6 +139,33 @@ protected:
 	EGLContext context;
 	EGLSurface surface; 
 	Window window;
+	sxge::Screen &sxgeScreen;
+
+	void eventLoop(void) {
+		bool appRunning = true;
+		while(appRunning) {
+			while(XPending(xDisplay)) {
+				XEvent xev;
+				XNextEvent(xDisplay, &xev);
+				switch (xev.type) {
+					case KeyPress: {
+						unsigned keycode, keysym;
+						keycode = ((XKeyEvent*)&xev)->keycode;
+						keysym = XKeycodeToKeysym(xDisplay, keycode, 0);
+						if (keysym == XK_Escape) {
+							appRunning = false;
+						}
+					}
+					case ConfigureNotify: {
+						sxgeScreen.reshape(xev.xconfigure.width,
+							xev.xconfigure.height);
+					}
+				}
+			}
+			sxgeScreen.display();
+			eglSwapBuffers(eglDisplay, surface);
+		}
+	}
 };
 
 }; //namespace sxge
