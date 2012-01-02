@@ -105,7 +105,7 @@ protected:
 		GLsizei realLogLen;
 		char *log = new char[logLen];
 		glGetShaderInfoLog(_shaderID, logLen, &realLogLen, log);
-		err("shader %x log: %s\n", _shaderID, log);
+		err("shader %x log: %s", _shaderID, log);
 		delete[] log;
 	}
 };

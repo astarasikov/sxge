@@ -64,7 +64,8 @@ public:
 			return false;
 		}
 
-		return true;
+		_isLinked = true;
+		return _isLinked;
 	}
 
 	bool isLinked() const {
