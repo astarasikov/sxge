@@ -51,7 +51,6 @@ public:
 		drawPlane(0.5);
 	}
 	void reshape(unsigned width, unsigned height) {
-		dbg("%s: %d %d", __func__, width, height);
 		glViewport(0, 0, width, height);
 	}
 protected:
@@ -89,7 +88,7 @@ protected:
 		glEnableVertexAttribArray(attr_pos);
 		glEnableVertexAttribArray(attr_col);
 
-		glDrawArrays(GL_TRIANGLES, 0, 4);
+		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
 		glDisableVertexAttribArray(attr_pos);
 		glDisableVertexAttribArray(attr_col);
