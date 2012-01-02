@@ -49,6 +49,11 @@ public:
 		XSetWindowAttributes xattr;
 		unsigned long mask;
 
+		static const EGLint ctx_attrs[] = {
+			EGL_CONTEXT_CLIENT_VERSION, 2,
+			EGL_NONE,
+		};
+
 		xDisplay = XOpenDisplay(NULL);
 		if (!xDisplay) {
 			err("failed to open native X11 xDisplay");
@@ -102,7 +107,8 @@ public:
 		XSetStandardProperties(xDisplay, window, "SXGE", "SXGE",
 			None, NULL, 0, NULL);
 
-		context = eglCreateContext(eglDisplay, config, 0, 0); 
+		context = eglCreateContext(eglDisplay, config, EGL_NO_CONTEXT,
+			ctx_attrs); 
 		if (EGL_NO_CONTEXT == context) {
 			err("failed to create EGL context");
 		}
@@ -140,26 +146,38 @@ protected:
 	EGLSurface surface; 
 	Window window;
 	sxge::Screen &sxgeScreen;
+	bool appRunning;
+
+	void keyPressEvent(XKeyEvent *ev) {
+		unsigned keycode, keysym;
+		keycode = ev->keycode;
+		keysym = XKeycodeToKeysym(xDisplay, keycode, 0);
+		if (keysym == XK_Escape) {
+			appRunning = false;
+		}
+	}
+
+	void motionEvent(XMotionEvent *ev) {
+		sxgeScreen.mouseEvent(ev->x, ev->y, sxge::Screen::MouseButton::NONE);
+	}
 
 	void eventLoop(void) {
-		bool appRunning = true;
+		appRunning = true;
 		while(appRunning) {
 			while(XPending(xDisplay)) {
 				XEvent xev;
 				XNextEvent(xDisplay, &xev);
 				switch (xev.type) {
-					case KeyPress: {
-						unsigned keycode, keysym;
-						keycode = ((XKeyEvent*)&xev)->keycode;
-						keysym = XKeycodeToKeysym(xDisplay, keycode, 0);
-						if (keysym == XK_Escape) {
-							appRunning = false;
-						}
-					}
-					case ConfigureNotify: {
+					case KeyPress:
+						keyPressEvent((XKeyEvent*)&xev);
+						break;
+					case ConfigureNotify:
 						sxgeScreen.reshape(xev.xconfigure.width,
 							xev.xconfigure.height);
-					}
+						break;
+					case MotionNotify:
+						motionEvent((XMotionEvent*)&xev);
+						break;
 				}
 			}
 			sxgeScreen.display();
