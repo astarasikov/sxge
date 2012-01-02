@@ -78,9 +78,10 @@ protected:
 		attr_col = glGetAttribLocation(pid, "color");
 		mvp_mtx = glGetUniformLocation(pid, "MVP");
 
-		auto mid = vmath::mat4f::identity();
+		auto r3 = vmath::mat3f::rotateZ(0.5);
+		auto rot = vmath::mat4f(r3);
 
-		glUniformMatrix4fv(mvp_mtx, 1, GL_FALSE, mid.getData());
+		glUniformMatrix4fv(mvp_mtx, 1, GL_FALSE, rot.getData());
 
 		glVertexAttribPointer(attr_pos, 2, GL_FLOAT, GL_FALSE, 0, vertices);
 		glVertexAttribPointer(attr_col, 3, GL_FLOAT, GL_FALSE, 0, colors);
