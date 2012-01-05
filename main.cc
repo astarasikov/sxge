@@ -78,10 +78,15 @@ protected:
 		attr_col = glGetAttribLocation(pid, "color");
 		mvp_mtx = glGetUniformLocation(pid, "MVP");
 
-		auto r3 = vmath::mat3f::rotateZ(0.5);
-		auto rot = vmath::mat4f(r3);
+		//FIXME: needs a reimplementation of window/screen
+		double aspect = 1.3;
+		auto proj = vmath::mat4f::projection(45.0, aspect, 1, 100);
+		auto r3 = vmath::mat3f::rotateZ(3.14 / 9);
+		auto translate = vmath::vec3f(0, 0, -5);
+		auto transform = vmath::mat4f(r3, translate);
+		auto mvp = proj * transform;
 
-		glUniformMatrix4fv(mvp_mtx, 1, GL_FALSE, rot.getData());
+		glUniformMatrix4fv(mvp_mtx, 1, GL_FALSE, mvp.getData());
 
 		glVertexAttribPointer(attr_pos, 2, GL_FLOAT, GL_FALSE, 0, vertices);
 		glVertexAttribPointer(attr_col, 3, GL_FLOAT, GL_FALSE, 0, colors);
