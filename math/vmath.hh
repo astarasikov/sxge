@@ -487,7 +487,7 @@ public:
 	}
 
 	static mat4 projection(T fovy, T aspect, T z_near, T z_far) {
-		mat4 ret = new mat4();
+		mat4 ret = mat4();
 
 		T ymax = z_near * std::tan(fovy * PI / 360.0);
 		T width = 2 * ymax;
