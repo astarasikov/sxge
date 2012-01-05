@@ -178,14 +178,11 @@ public:
 	}
 
 	mat2(const T* raw_data, bool transposed) {
-		std::copy(raw_data, raw_data + items, data);
-		if (!transposed) {
-			transpose(data);
-		}
+		init(raw_data, transposed);
 	}
 
 	mat2(mat2 &m2) {
-		mat2(m2.data, true);
+		init(m2.data, true);
 	}
 
 	static mat2 identity() {
@@ -276,6 +273,13 @@ public:
 protected:
 	T data[items];
 
+	void init(const T* raw_data, bool transposed) {
+		std::copy(raw_data, raw_data + items, data);
+		if (!transposed) {
+			transpose(data);
+		}
+	}
+
 	static void transpose(T* data) {
 		std::swap(data[1], data[2]);
 	}
@@ -322,14 +326,11 @@ public:
 	}
 
 	mat3(const mat3 &m2) {
-		mat3(m2.data, false);
+		init(m2.data, false);
 	}
 
 	mat3(const T* raw_data, bool transposed) {
-		std::copy(raw_data, raw_data + items, data);
-		if (!transposed) {
-			transpose(data);
-		}
+		init(raw_data, transposed);
 	}
 
 	static mat3 identity() {
@@ -435,6 +436,13 @@ public:
 
 protected:
 	T data[items];
+	
+	void init(const T* raw_data, bool transposed) {
+		std::copy(raw_data, raw_data + items, data);
+		if (!transposed) {
+			transpose(data);
+		}
+	}
 
 	static void transpose(T* data) {
 		for (int i = 0; i < 3; i++) {
@@ -455,26 +463,19 @@ public:
 	}
 
 	mat4(const mat4 &m2) {
-		mat4(m2.data, false);
+		init(m2.data, false);
 	}
 
 	mat4(const T* raw_data, bool transposed) {
-		std::copy(raw_data, raw_data + items, data);
-		if (!transposed) {
-			transpose(data);
-		}
+		init(raw_data, transposed);
 	}
 
 	mat4(mat3<T> &rs) {
-		T* d = rs.getData();
-		std::copy(d, d + 3, data);
-		std::copy(d + 3, d + 6, data + 4);
-		std::copy(d + 6, d + 9, data + 8);
-		data[15] = 1;
+		fromMat3(rs);
 	}
 
 	mat4(mat3<T> &rs, const vec3<T> &t) {
-		mat4::mat4(rs);
+		fromMat3(rs);
 		data[12] = t.X();
 		data[13] = t.Y();
 		data[14] = t.Z();
@@ -582,6 +583,21 @@ public:
 
 protected:
 	T data[items];
+
+	void init(const T* raw_data, bool transposed) {
+		std::copy(raw_data, raw_data + items, data);
+		if (!transposed) {
+			transpose(data);
+		}
+	}
+
+	void fromMat3(mat3<T> &rs) {
+		T* d = rs.getData();
+		std::copy(d, d + 3, data);
+		std::copy(d + 3, d + 6, data + 4);
+		std::copy(d + 6, d + 9, data + 8);
+		data[15] = 1;
+	}
 
 	static void transpose(T* data) {
 		for (int i = 0; i < 4; i++) {
