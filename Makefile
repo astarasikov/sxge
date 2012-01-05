@@ -1,2 +1,2 @@
-LIBS=-lGL -lEGL -lX11
+LIBS=-lGLESv2 -lEGL -lX11
 include Makefile.common
