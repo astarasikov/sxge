@@ -81,10 +81,19 @@ protected:
 		//FIXME: needs a reimplementation of window/screen
 		double aspect = 1.3;
 		auto proj = vmath::mat4f::projection(45.0, aspect, 1, 100);
+		
+		//Transformation matrix
 		auto r3 = vmath::mat3f::rotateZ(3.14 / 9);
 		auto translate = vmath::vec3f(0, 0, -5);
 		auto transform = vmath::mat4f(r3, translate);
-		auto mvp = proj * transform;
+		
+		//Camera view matrix
+		auto eye = vmath::vec3f(0, 0, 1);
+		auto up = vmath::vec3f(0, 1, 1);
+		auto to = vmath::vec3f(0, 0, 0);
+		auto view = vmath::mat4f::lookAt(eye, to, up);
+
+		auto mvp = proj * view * transform;
 
 		glUniformMatrix4fv(mvp_mtx, 1, GL_FALSE, mvp.getData());
 

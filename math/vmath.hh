@@ -481,34 +481,6 @@ public:
 		data[14] = t.Z();
 	}
 
-	static mat4 identity() {
-		mat4 ret = mat4();
-		ret.data[0] = ret.data[5] = ret.data[10] = ret.data[15] = 1;
-		return ret;
-	}
-
-	static mat4 projection(T fovy, T aspect, T z_near, T z_far) {
-		mat4 ret = mat4();
-
-		T ymax = z_near * std::tan(fovy * PI / 360.0);
-		T width = 2 * ymax;
-
-		T depth = z_far - z_near;
-		T d = -(z_far + z_near) / depth;
-		T dn = -2 * (z_far * z_near) / depth;
-
-		T w = 2 * z_near / width;
-		T h = w * aspect;
-
-		ret.data[0] = w;
-		ret.data[5] = h;
-		ret.data[10] = d;
-		ret.data[11] = -1;
-		ret.data[14] = dn;
-		
-		return ret;
-	}
-
 	mat4 transposed() {
 		mat4 ret(data, true);
 		transpose(ret.data);
@@ -563,6 +535,57 @@ public:
 	static mat4 rotateZ(T theta) {
 		mat3<T> rz = mat3<T>::rotateX(theta);
 		return mat4(rz); 
+	}
+	
+	static mat4 identity() {
+		mat4 ret = mat4();
+		ret.data[0] = ret.data[5] = ret.data[10] = ret.data[15] = 1;
+		return ret;
+	}
+
+	static mat4 projection(T fovy, T aspect, T z_near, T z_far) {
+		mat4 ret = mat4();
+
+		T ymax = z_near * std::tan(fovy * PI / 360.0);
+		T width = 2 * ymax;
+
+		T depth = z_far - z_near;
+		T d = -(z_far + z_near) / depth;
+		T dn = -2 * (z_far * z_near) / depth;
+
+		T w = 2 * z_near / width;
+		T h = w * aspect;
+
+		ret.data[0] = w;
+		ret.data[5] = h;
+		ret.data[10] = d;
+		ret.data[11] = -1;
+		ret.data[14] = dn;
+		
+		return ret;
+	}
+
+	static mat4 lookAt(const vec3<T> &eye, const vec3<T> &to,
+		const vec3<T> &up) {
+		mat4 ret = identity();
+		
+		vec3<T> view = to - eye;
+		vec3<T> normal = (view.cross(up)).norm();
+		vec3<T> new_up = (normal.cross(view)).norm();
+	
+		ret.data[0] = normal.X();
+		ret.data[1] = normal.Y();
+		ret.data[2] = normal.Z();
+
+		ret.data[4] = new_up.X();
+		ret.data[5] = new_up.Y();
+		ret.data[6] = new_up.Z();
+
+		ret.data[8] = -(view.X());
+		ret.data[9] = -(view.Y());
+		ret.data[10] = -(view.Z());
+
+		return ret;
 	}
 	
 	T* getData() {
