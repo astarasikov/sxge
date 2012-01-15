@@ -51,10 +51,13 @@ public:
 		drawPlane(0.5);
 	}
 	void reshape(unsigned width, unsigned height) {
+		this->width = width;
+		this->height = height;
 		glViewport(0, 0, width, height);
 	}
 protected:
 	sxge::ShaderProgram *shaderProg;
+	unsigned width, height;
 
 	void drawPlane(float size) {
 		GLfloat vertices[] = {
@@ -79,7 +82,7 @@ protected:
 		mvp_mtx = glGetUniformLocation(pid, "MVP");
 
 		//FIXME: needs a reimplementation of window/screen
-		double aspect = 1.3;
+		double aspect = (double)width / height;
 		auto proj = vmath::mat4f::projection(45.0, aspect, 1, 100);
 		
 		//Transformation matrix
