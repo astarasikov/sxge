@@ -31,6 +31,10 @@ public:
 		return vec2(_x, _y);
 	}
 
+	vec2 reflect(const vec2 &v2) const {
+		return v2 - v2 * 2 * (dot(v2));
+	}
+
 	T cross2d(const vec2 &v2) const {
 		return x * v2.y - y * v2.x;
 	}
@@ -140,6 +144,10 @@ public:
 	
 	inline const T& Z() const {
 		return z;
+	}
+
+	vec3 reflect(const vec3 &v2) const {
+		return v2 - v2 * 2 * (dot(v2));
 	}
 
 	friend std::ostream &operator<<(std::ostream &stream, vec3 const &v) {
