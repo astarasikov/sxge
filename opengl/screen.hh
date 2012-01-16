@@ -47,6 +47,8 @@ public:
 		KS_Ctrl = 1 << 2,
 		KS_Mod1 = 1 << 3,
 		KS_Mod2 = 1 << 4,
+		KS_Mod3 = 1 << 5,
+		KS_Mod4 = 1 << 6,
 	} KeyStatus;
 
 	virtual ~Screen() {}

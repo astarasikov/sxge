@@ -19,7 +19,7 @@ void printGLInfo(void) {
 
 class TestScreen : public sxge::Screen {
 public:
-	TestScreen() : shaderProg(NULL), ox(0), oy(0) {
+	TestScreen() : shaderProg(NULL), ox(0), oy(0), oz(-5) {
 	}
 
 	~TestScreen() {
@@ -47,13 +47,26 @@ public:
 				ox += 0.1;
 				break;
 			case SK_Up:
-				oy += 0.1;
+				if (ks & KS_Ctrl) {
+					oz += 0.1;
+				}
+				else {
+					oy += 0.1;
+				}
 				break;
 			case SK_Down:
-				oy -= 0.1;
+				if (ks & KS_Ctrl) {
+					oz -= 0.1;
+				}
+				else {
+					oy -= 0.1;
+				}
 				break;
 			default:
 				break;
+		}
+		if (key) {
+			printf("%c\n", key);
 		}
 	}
 	void mouseEvent(unsigned x, unsigned y, MouseButton buttons) {
@@ -74,7 +87,7 @@ protected:
 	sxge::ShaderProgram *shaderProg;
 	unsigned width, height;
 
-	double ox, oy;
+	double ox, oy, oz;
 
 	void drawPlane(float size) {
 		GLfloat vertices[] = {
@@ -104,7 +117,7 @@ protected:
 		
 		//Transformation matrix
 		auto r3 = vmath::mat3f::rotateZ(3.14 / 9);
-		auto translate = vmath::vec3f(ox, oy, -5);
+		auto translate = vmath::vec3f(ox, oy, oz);
 		auto transform = vmath::mat4f(r3, translate);
 		
 		//Camera view matrix

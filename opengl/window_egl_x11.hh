@@ -190,7 +190,37 @@ protected:
 		return false;
 	}
 
-	void keyPressEvent(XKeyEvent *ev) {
+	void translateKeyState(XKeyEvent *ev, Screen::KeyStatus &ks, bool isDown) {
+		if (isDown) {
+			ks = (Screen::KeyStatus)(ks | (Screen::KS_Down));
+		}
+
+		if (ev->state & ControlMask) {
+			ks = (Screen::KeyStatus)(ks | (Screen::KS_Ctrl));
+		}
+
+		if (ev->state & ShiftMask) {
+			ks = (Screen::KeyStatus)(ks | (Screen::KS_Shift));
+		}
+
+		if (ev->state & Mod1Mask) {
+			ks = (Screen::KeyStatus)(ks | (Screen::KS_Mod1));
+		}
+
+		if (ev->state & Mod2Mask) {
+			ks = (Screen::KeyStatus)(ks | (Screen::KS_Mod2));
+		}
+		
+		if (ev->state & Mod3Mask) {
+			ks = (Screen::KeyStatus)(ks | (Screen::KS_Mod3));
+		}
+		
+		if (ev->state & Mod4Mask) {
+			ks = (Screen::KeyStatus)(ks | (Screen::KS_Mod4));
+		}
+	}
+
+	void keyPressEvent(XKeyEvent *ev, bool isDown) {
 		Screen::SpecialKey sk;
 		unsigned keycode, keysym;
 		keycode = ev->keycode;
@@ -201,16 +231,19 @@ protected:
 			appRunning = false;
 			return;
 		}
-		
+
+		Screen::KeyStatus ks = Screen::KeyStatus::KS_Up;
+		translateKeyState(ev, ks, isDown);
+
 		if (translateSpecial(keysym, sk)) {
-			sxgeScreen.keyEvent(0, sk, Screen::KS_Down);
+			sxgeScreen.keyEvent(0, sk, ks);
 			return;
 		}
 
-		//char keyChar;
-		//if (XLookupString(ev, &keyChar, sizeof(char), &keysym, NULL)) {
-		//	sxgeScreen.keyEvent(keyChar, Screen::SK_None, Screen::KS_Down);
-		//}
+		char keyChar;
+		if (XLookupString(ev, &keyChar, sizeof(char), NULL, NULL)) {
+			sxgeScreen.keyEvent(keyChar, Screen::SK_None, ks);
+		}
 	}
 
 	void motionEvent(XMotionEvent *ev) {
@@ -225,7 +258,10 @@ protected:
 				XNextEvent(xDisplay, &xev);
 				switch (xev.type) {
 					case KeyPress:
-						keyPressEvent((XKeyEvent*)&xev);
+						keyPressEvent((XKeyEvent*)&xev, true);
+						break;
+					case KeyRelease:
+						keyPressEvent((XKeyEvent*)&xev, false);
 						break;
 					case ConfigureNotify:
 						sxgeScreen.reshape(xev.xconfigure.width,
