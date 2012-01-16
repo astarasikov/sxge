@@ -40,35 +40,74 @@ public:
 		shaderProg->link();
 	}
 
+	void clampAngle(double &angle) {
+		while (angle > 6.28) {
+			angle -= 6.28;
+		}
+		while (angle < -6.28) {
+			angle += 6.28;
+		}
+		if (angle < 0) {
+			angle += 6.28;
+		}
+	}
+
 	void keyEvent(char key, SpecialKey sk, KeyStatus ks) {
+		//FIXME: add proper camera, models, scene etc
+		double dt = 0.1;
+		double dr = 2 * 0.314; //as bad as it can be 
+
 		switch (sk) {
 			case SK_Left:
-				ox -= 0.1;
+				ox -= dt;
 				break;
 			case SK_Right:
-				ox += 0.1;
+				ox += dt;
 				break;
 			case SK_Up:
 				if (ks & KS_Ctrl) {
-					oz += 0.1;
+					oz += dt;
 				}
 				else {
-					oy += 0.1;
+					oy += dt;
 				}
 				break;
 			case SK_Down:
 				if (ks & KS_Ctrl) {
-					oz -= 0.1;
+					oz -= dt;
 				}
 				else {
-					oy -= 0.1;
+					oy -= dt;
 				}
 				break;
 			default:
 				break;
 		}
-		if (key) {
-			printf("%c\n", key);
+		switch (key) {
+			case 'x':
+				rx -= dr;
+				clampAngle(rx);
+				break;
+			case 'X':
+				rx += dr;
+				clampAngle(rx);
+				break;
+			case 'y':
+				ry -= dr;
+				clampAngle(ry);
+				break;
+			case 'Y':
+				ry += dr;
+				clampAngle(ry);
+				break;
+			case 'z':
+				rz -= dr;
+				clampAngle(rz);
+				break;
+			case 'Z':
+				rz += dr;
+				clampAngle(rz);
+				break;
 		}
 	}
 	void mouseEvent(unsigned x, unsigned y, MouseButton buttons) {
