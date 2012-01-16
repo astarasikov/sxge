@@ -19,7 +19,9 @@ void printGLInfo(void) {
 
 class TestScreen : public sxge::Screen {
 public:
-	TestScreen() : shaderProg(NULL), ox(0), oy(0), oz(-5) {
+	TestScreen() : shaderProg(NULL), ox(0), oy(0), oz(-5),
+		rx(0), ry(0), rz(0)
+	{
 	}
 
 	~TestScreen() {
@@ -88,6 +90,7 @@ protected:
 	unsigned width, height;
 
 	double ox, oy, oz;
+	double rx, ry, rz;
 
 	void drawPlane(float size) {
 		GLfloat vertices[] = {
@@ -116,9 +119,13 @@ protected:
 		auto proj = vmath::mat4f::projection(45.0, aspect, 1, 100);
 		
 		//Transformation matrix
-		auto r3 = vmath::mat3f::rotateZ(3.14 / 9);
+		auto rX = vmath::mat3f::rotateX(rx);
+		auto rZ = vmath::mat3f::rotateZ(rz);
+		auto rY = vmath::mat3f::rotateY(ry);
+		auto rXrZ = rZ * rX;
+		auto rXrZrY = rY * rXrZ;
 		auto translate = vmath::vec3f(ox, oy, oz);
-		auto transform = vmath::mat4f(r3, translate);
+		auto transform = vmath::mat4f(rXrZrY, translate);
 		
 		//Camera view matrix
 		auto eye = vmath::vec3f(0, 0, 1);

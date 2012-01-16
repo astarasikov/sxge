@@ -377,6 +377,20 @@ public:
 		}
 		return ret;
 	}
+	
+	mat3 operator*(const mat3 &m2) const {
+		mat3 ret = mat3();
+		//FIXME: i am lazy to unroll it
+		for (int i = 0; i < 3; i++) {
+			for (int j = 0; j < 3; j++) {
+				for (int k = 0; k < 3; k++) {
+					ret.data[3 * j + i] += data[3 * k + i] * m2.data[3 * j + k];
+				}
+			}
+		}
+
+		return ret;
+	}
 
 	static mat3 rotateX(T theta) {
 		mat3 ret = identity();
