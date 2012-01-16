@@ -152,13 +152,65 @@ protected:
 	sxge::Screen &sxgeScreen;
 	bool appRunning;
 
+	//Not a single lookup table because X keycodes are sparse
+	bool translateSpecial(unsigned keysym, Screen::SpecialKey &sk) {
+		switch(keysym) {
+			case XK_BackSpace:
+				sk = Screen::SpecialKey::SK_BackSpace;
+				return true;
+			case XK_Tab:
+				sk = Screen::SpecialKey::SK_Tab;
+				return true;
+			case XK_Return:
+				sk = Screen::SpecialKey::SK_Return;
+				return true;
+			case XK_Delete:
+				sk = Screen::SpecialKey::SK_Delete;
+				return true;
+			case XK_Escape:
+				sk = Screen::SpecialKey::SK_Escape;
+				return true;
+			case XK_Left:
+				sk = Screen::SpecialKey::SK_Left;
+				return true;
+			case XK_Right:
+				sk = Screen::SpecialKey::SK_Right;
+				return true;
+			case XK_Down:
+				sk = Screen::SpecialKey::SK_Down;
+				return true;
+			case XK_Up:
+				sk = Screen::SpecialKey::SK_Up;
+				return true;
+			case XK_KP_Space:
+				sk = Screen::SpecialKey::SK_Space;
+				return true;
+		}
+		
+		return false;
+	}
+
 	void keyPressEvent(XKeyEvent *ev) {
+		Screen::SpecialKey sk;
 		unsigned keycode, keysym;
 		keycode = ev->keycode;
 		keysym = XKeycodeToKeysym(xDisplay, keycode, 0);
+
+		//XXX: add notification
 		if (keysym == XK_Escape) {
 			appRunning = false;
+			return;
 		}
+		
+		if (translateSpecial(keysym, sk)) {
+			sxgeScreen.keyEvent(0, sk, Screen::KS_Down);
+			return;
+		}
+
+		//char keyChar;
+		//if (XLookupString(ev, &keyChar, sizeof(char), &keysym, NULL)) {
+		//	sxgeScreen.keyEvent(keyChar, Screen::SK_None, Screen::KS_Down);
+		//}
 	}
 
 	void motionEvent(XMotionEvent *ev) {
