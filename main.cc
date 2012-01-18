@@ -1,11 +1,13 @@
 #include <iostream>
 #include "util/log.h"
 #include "math/vmath.hh"
+#include "math/utils.hh"
 #include "opengl/shader.hh"
 #include "opengl/program.hh"
 #include "opengl/window_egl_x11.hh"
 #include "opengl/screen.hh"
 #include "scene/camera.hh"
+#include "scene/model.hh"
 
 void printGLInfo(void) {
 	auto renderer = glGetString(GL_RENDERER);
@@ -24,12 +26,14 @@ public:
 		shaderProg(NULL),
 		camera(new sxge::Camera()),
 		ox(0), oy(0), oz(-5),
-		rx(0), ry(0), rz(0)
+		rx(0), ry(0), rz(0),
+		mdl(sxge::Model::surface(1.0))
 	{}
 
 	~TestScreen() {
 		delete shaderProg;
 		delete camera;
+		delete mdl;
 	}
 
 	void init(void) {
@@ -100,7 +104,7 @@ public:
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(1.0, 1.0, 1.0, 1.0);
 		shaderProg->bind();
-		drawPlane(0.5);
+		drawScene();
 	}
 	void reshape(unsigned width, unsigned height) {
 		this->width = width;
@@ -115,22 +119,10 @@ protected:
 
 	double ox, oy, oz;
 	int rx, ry, rz;
+	
+	sxge::Model *mdl;
 
-	void drawPlane(float size) {
-		GLfloat vertices[] = {
-			0, 0,
-			size, 0,
-			size, size,
-			0, size,
-		};
-
-		GLfloat colors[] = {
-			1, 0, 0,
-			0, 1, 0,
-			0, 0, 1,
-			0, 1, 1,
-		};
-
+	void drawScene() {
 		GLuint attr_pos, attr_col, mvp_mtx;
 		GLuint pid = shaderProg->programID();
 
@@ -156,8 +148,11 @@ protected:
 
 		glUniformMatrix4fv(mvp_mtx, 1, GL_FALSE, mvp.getData());
 
-		glVertexAttribPointer(attr_pos, 2, GL_FLOAT, GL_FALSE, 0, vertices);
-		glVertexAttribPointer(attr_col, 3, GL_FLOAT, GL_FALSE, 0, colors);
+		glVertexAttribPointer(attr_pos, mdl->getVertexStride(),
+			GL_FLOAT, GL_FALSE, 0, mdl->vertices);
+
+		glVertexAttribPointer(attr_col, mdl->getColorStride(),
+			GL_FLOAT, GL_FALSE, 0, mdl->colors);
 
 		glEnableVertexAttribArray(attr_pos);
 		glEnableVertexAttribArray(attr_col);
