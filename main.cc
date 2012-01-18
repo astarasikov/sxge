@@ -5,6 +5,7 @@
 #include "opengl/program.hh"
 #include "opengl/window_egl_x11.hh"
 #include "opengl/screen.hh"
+#include "scene/camera.hh"
 
 void printGLInfo(void) {
 	auto renderer = glGetString(GL_RENDERER);
@@ -19,15 +20,16 @@ void printGLInfo(void) {
 
 class TestScreen : public sxge::Screen {
 public:
-	TestScreen() : shaderProg(NULL), ox(0), oy(0), oz(-5),
+	TestScreen() :
+		shaderProg(NULL),
+		camera(new sxge::Camera()),
+		ox(0), oy(0), oz(-5),
 		rx(0), ry(0), rz(0)
-	{
-	}
+	{}
 
 	~TestScreen() {
-		if (shaderProg) {
-			delete shaderProg;
-		}
+		delete shaderProg;
+		delete camera;
 	}
 
 	void init(void) {
@@ -40,22 +42,9 @@ public:
 		shaderProg->link();
 	}
 
-	void clampAngle(double &angle) {
-		while (angle > 6.28) {
-			angle -= 6.28;
-		}
-		while (angle < -6.28) {
-			angle += 6.28;
-		}
-		if (angle < 0) {
-			angle += 6.28;
-		}
-	}
-
 	void keyEvent(char key, SpecialKey sk, KeyStatus ks) {
 		//FIXME: add proper camera, models, scene etc
 		double dt = 0.1;
-		double dr = 2 * 0.314; //as bad as it can be 
 
 		switch (sk) {
 			case SK_Left:
@@ -85,28 +74,22 @@ public:
 		}
 		switch (key) {
 			case 'x':
-				rx -= dr;
-				clampAngle(rx);
+				rx = ((rx - 1) % -360);
 				break;
 			case 'X':
-				rx += dr;
-				clampAngle(rx);
+				rx = ((rx + 1) % 360);
 				break;
 			case 'y':
-				ry -= dr;
-				clampAngle(ry);
+				ry = ((ry - 1) % -360);
 				break;
 			case 'Y':
-				ry += dr;
-				clampAngle(ry);
+				ry = ((ry + 1) % -360);
 				break;
 			case 'z':
-				rz -= dr;
-				clampAngle(rz);
+				rz = ((rz - 1) % -360);
 				break;
 			case 'Z':
-				rz += dr;
-				clampAngle(rz);
+				rz = ((rz + 1) % -360);
 				break;
 		}
 	}
@@ -126,10 +109,12 @@ public:
 	}
 protected:
 	sxge::ShaderProgram *shaderProg;
+	sxge::Camera *camera;
+
 	unsigned width, height;
 
 	double ox, oy, oz;
-	double rx, ry, rz;
+	int rx, ry, rz;
 
 	void drawPlane(float size) {
 		GLfloat vertices[] = {
@@ -158,19 +143,14 @@ protected:
 		auto proj = vmath::mat4f::projection(45.0, aspect, 1, 100);
 		
 		//Transformation matrix
-		auto rX = vmath::mat3f::rotateX(rx);
-		auto rZ = vmath::mat3f::rotateZ(rz);
-		auto rY = vmath::mat3f::rotateY(ry);
+		auto rX = vmath::mat3f::rotateX(sxge::degToRad((float)rx));
+		auto rZ = vmath::mat3f::rotateZ(sxge::degToRad((float)rz));
+		auto rY = vmath::mat3f::rotateY(sxge::degToRad((float)ry));
 		auto rXrZ = rZ * rX;
 		auto rXrZrY = rY * rXrZ;
 		auto translate = vmath::vec3f(ox, oy, oz);
 		auto transform = vmath::mat4f(rXrZrY, translate);
-		
-		//Camera view matrix
-		auto eye = vmath::vec3f(0, 0, 1);
-		auto up = vmath::vec3f(0, 1, 1);
-		auto to = vmath::vec3f(0, 0, 0);
-		auto view = vmath::mat4f::lookAt(eye, to, up);
+		auto view = camera->getMatrix();
 
 		auto mvp = proj * view * transform;
 
