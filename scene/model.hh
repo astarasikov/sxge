@@ -6,18 +6,6 @@
 
 namespace sxge {
 
-struct Material {
-	vmath::rvec4f ambient;
-	vmath::rvec4f diffuse;
-	vmath::rvec4f specular;
-	vmath::rvec4f emissive;
-	float shininess;
-};
-
-struct Light {
-	vmath::rvec4f color;
-};
-
 class Model {
 public:
 	Model() : vertices(NULL), colors(NULL), texCoords(NULL),
@@ -36,16 +24,8 @@ public:
 		return vtxStride;
 	}
 
-	size_t getNumColors() const {
-		return nColors;
-	}
-
 	size_t getColorStride() const {
 		return colStride;
-	}
-
-	size_t getNumTexCoords() const {
-		return nTexCoords;
 	}
 
 	static Model *surface(float size) {

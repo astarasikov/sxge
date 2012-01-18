@@ -157,7 +157,7 @@ protected:
 		glEnableVertexAttribArray(attr_pos);
 		glEnableVertexAttribArray(attr_col);
 
-		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+		glDrawArrays(GL_TRIANGLE_FAN, 0, mdl->getNumVertices());
 
 		glDisableVertexAttribArray(attr_pos);
 		glDisableVertexAttribArray(attr_col);
