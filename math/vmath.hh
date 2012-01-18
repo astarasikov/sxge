@@ -481,7 +481,7 @@ public:
 	static const int items = 16;
 
 	mat4() {
-		std::fill(data, data + items, 0.0);
+		initZeroes();
 	}
 
 	mat4(const mat4 &m2) {
@@ -498,9 +498,13 @@ public:
 
 	mat4(mat3<T> &rs, const vec3<T> &t) {
 		fromMat3(rs);
-		data[12] = t.X();
-		data[13] = t.Y();
-		data[14] = t.Z();
+		setTranslation(t);
+	}
+
+	mat4(const vec3<T> &t) {
+		initZeroes();
+		initIdentity();
+		setTranslation(t);
 	}
 
 	mat4 transposed() {
@@ -561,7 +565,7 @@ public:
 	
 	static mat4 identity() {
 		mat4 ret = mat4();
-		ret.data[0] = ret.data[5] = ret.data[10] = ret.data[15] = 1;
+		ret.initIdentity();
 		return ret;
 	}
 
@@ -629,11 +633,25 @@ public:
 protected:
 	T data[items];
 
+	void initZeroes(void) {
+		std::fill(data, data + items, 0.0);
+	}
+
+	void initIdentity(void) {
+		data[0] = data[5] = data[10] = data[15] = 1;
+	}
+
 	void init(const T* raw_data, bool transposed) {
 		std::copy(raw_data, raw_data + items, data);
 		if (!transposed) {
 			transpose(data);
 		}
+	}
+
+	void setTranslation(const vec3<T> &t) {
+		data[12] = t.X();
+		data[13] = t.Y();
+		data[14] = t.Z();
 	}
 
 	void fromMat3(mat3<T> &rs) {
