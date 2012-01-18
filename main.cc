@@ -27,7 +27,7 @@ public:
 		camera(new sxge::Camera()),
 		ox(0), oy(0), oz(-5),
 		rx(0), ry(0), rz(0),
-		mdl(sxge::Model::surface(1.0))
+		mdl(sxge::Model::cube(1.0))
 	{}
 
 	~TestScreen() {
@@ -44,6 +44,9 @@ public:
 		shaderProg->addShaderFromFile(sxge::Shader::Fragment, 
 			"shaders/test.frag");
 		shaderProg->link();
+
+		glEnable(GL_CULL_FACE);
+		glEnable(GL_DEPTH_TEST);
 	}
 
 	void keyEvent(char key, SpecialKey sk, KeyStatus ks) {
@@ -130,7 +133,6 @@ protected:
 		attr_col = glGetAttribLocation(pid, "color");
 		mvp_mtx = glGetUniformLocation(pid, "MVP");
 
-		//FIXME: needs a reimplementation of window/screen
 		double aspect = (double)width / height;
 		auto proj = vmath::mat4f::projection(45.0, aspect, 1, 100);
 		
@@ -157,7 +159,13 @@ protected:
 		glEnableVertexAttribArray(attr_pos);
 		glEnableVertexAttribArray(attr_col);
 
-		glDrawArrays(GL_TRIANGLE_FAN, 0, mdl->getNumVertices());
+		if (mdl->hasIndices()) {
+			glDrawElements(GL_TRIANGLES, mdl->getNumIndices(),
+				GL_UNSIGNED_INT, mdl->indices);
+		}
+		else {
+			glDrawArrays(GL_TRIANGLES, 0, mdl->getNumVertices());
+		}
 
 		glDisableVertexAttribArray(attr_pos);
 		glDisableVertexAttribArray(attr_col);
