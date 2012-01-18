@@ -9,8 +9,7 @@ namespace sxge {
 class Model {
 public:
 	Model() : vertices(NULL), colors(NULL), texCoords(NULL),
-		nVertices(0), nColors(0), nTexCoords(0),
-		vtxStride(0), colStride(0)
+		nVertices(0), vtxStride(0), colStride(0)
 	{}
 
 	virtual ~Model() {
@@ -54,10 +53,9 @@ public:
 
 		mdl->vertices = vertices;
 		mdl->vtxStride = 2;
-		mdl->nVertices = nvert;
+		mdl->nVertices = 4;
 
 		mdl->colors = colors;
-		mdl->nColors = ncol;
 		mdl->colStride = 3;
 
 		return mdl;
@@ -69,7 +67,6 @@ public:
 
 protected:
 	size_t nVertices;
-	size_t nColors;
 	size_t nTexCoords;
 
 	size_t vtxStride;
