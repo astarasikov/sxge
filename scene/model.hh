@@ -9,7 +9,7 @@ namespace sxge {
 class Model {
 public:
 	Model() : vertices(NULL), indices(NULL), colors(NULL), texCoords(NULL),
-		nVertices(0), nIndices(0), vtxStride(0), colStride(0)
+		nVertices(0), nIndices(0), vtxStride(0), colStride(0), texStride(0)
 	{}
 
 	virtual ~Model() {
@@ -33,6 +33,20 @@ public:
 
 	bool hasIndices() const {
 		return nIndices && (indices != NULL);
+	}
+
+	size_t getTexStride() const {
+		return texStride;
+	}
+
+	bool hasTextures() const {
+		return texCoords != NULL;
+	}
+
+	static Model *loadObj() {
+		Model *mdl = new Model();
+
+		return mdl;
 	}
 
 	static Model *surface(float size) {
@@ -71,7 +85,7 @@ public:
 
 	static Model *cube(float size) {
 		const size_t nvert = 8 * 3;
-		//const size_t nidx = 36;
+		const size_t ntexc = 8 * 2;
 		const size_t nidx = 36;
 		
 		const float colors[nvert] = {
@@ -83,6 +97,17 @@ public:
 			1, 0, 1,
 			1, 1, 0,
 			1, 1, 1,
+		};
+
+		const float texcoords[ntexc] = {
+			0, 0,
+			0, 1,
+			1, 0,
+			1, 1,
+			0, 0,
+			0, 1,
+			1, 0,
+			1, 1,
 		};
 
 		const int indices[nidx] = {
@@ -127,10 +152,12 @@ public:
 		auto mvertices = new float[nvert];
 		auto mcolors = new float[nvert];
 		auto mindices = new unsigned[nidx];
+		auto mtexcoords = new float[ntexc];
 
 		std::copy(vertices, vertices + nvert, mvertices);
 		std::copy(colors, colors + nvert, mcolors);
 		std::copy(indices, indices + nidx, mindices);
+		std::copy(texcoords, texcoords + ntexc, mtexcoords);
 
 		Model *mdl = new Model();
 		mdl->vertices = mvertices;
@@ -142,6 +169,9 @@ public:
 
 		mdl->indices = mindices;
 		mdl->nIndices = nidx;
+
+		mdl->texCoords = mtexcoords;
+		mdl->texStride = 2;
 
 		return mdl;
 	}
@@ -157,6 +187,7 @@ protected:
 
 	size_t vtxStride;
 	size_t colStride;
+	size_t texStride;
 };
 
 } //namespace sxge
