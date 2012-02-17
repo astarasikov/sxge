@@ -2,10 +2,11 @@
 #include "util/log.h"
 #include "math/vmath.hh"
 #include "math/utils.hh"
-#include "opengl/shader.hh"
 #include "opengl/program.hh"
-#include "opengl/window_egl_x11.hh"
 #include "opengl/screen.hh"
+#include "opengl/shader.hh"
+#include "opengl/texture.hh"
+#include "opengl/window_egl_x11.hh"
 #include "scene/camera.hh"
 #include "scene/model.hh"
 
@@ -20,20 +21,43 @@ void printGLInfo(void) {
 	info("GLSL Version %s", glslVersion);
 }
 
+void gl_check(void) {
+	GLenum err = glGetError();
+	if (!err) {
+		return;
+	}
+	switch(err) {
+		case GL_INVALID_ENUM:
+		info("invalid enum");
+		break;
+		case GL_INVALID_VALUE:
+		info("invalid value");
+		break;
+		case GL_INVALID_OPERATION:
+		info("invalid operation");
+		break;
+		case GL_OUT_OF_MEMORY:
+		info("OOM");
+		break;
+	}
+}
+
 class TestScreen : public sxge::Screen {
 public:
 	TestScreen() :
 		shaderProg(NULL),
 		camera(new sxge::Camera()),
 		ox(0), oy(0), oz(-5),
-		rx(0), ry(0), rz(0),
-		mdl(sxge::Model::cube(1.0))
+		rx(30), ry(30), rz(0),
+		mdl(sxge::Model::cube(1.0)),
+		texture(new sxge::Texture("res/tex1.dat", 256, 256))
 	{}
 
 	~TestScreen() {
 		delete shaderProg;
 		delete camera;
 		delete mdl;
+		delete texture;
 	}
 
 	void init(void) {
@@ -47,6 +71,7 @@ public:
 
 		glEnable(GL_CULL_FACE);
 		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_TEXTURE_2D);
 	}
 
 	void keyEvent(char key, SpecialKey sk, KeyStatus ks) {
@@ -124,13 +149,17 @@ protected:
 	int rx, ry, rz;
 	
 	sxge::Model *mdl;
+	sxge::Texture *texture;
 
 	void drawScene() {
-		GLuint attr_pos, attr_col, mvp_mtx;
+		GLuint attr_pos, attr_col, attr_tex, mvp_mtx;
+		GLuint texUniform;
 		GLuint pid = shaderProg->programID();
 
 		attr_pos = glGetAttribLocation(pid, "position");
 		attr_col = glGetAttribLocation(pid, "color");
+		attr_tex = glGetAttribLocation(pid, "texcoord");
+		texUniform = glGetUniformLocation(pid, "sTexture");
 		mvp_mtx = glGetUniformLocation(pid, "MVP");
 
 		double aspect = (double)width / height;
@@ -149,15 +178,23 @@ protected:
 		auto mvp = proj * view * transform;
 
 		glUniformMatrix4fv(mvp_mtx, 1, GL_FALSE, mvp.getData());
-
+		
 		glVertexAttribPointer(attr_pos, mdl->getVertexStride(),
 			GL_FLOAT, GL_FALSE, 0, mdl->vertices);
 
 		glVertexAttribPointer(attr_col, mdl->getColorStride(),
 			GL_FLOAT, GL_FALSE, 0, mdl->colors);
 
+		glVertexAttribPointer(attr_tex, mdl->getTexStride(),
+			GL_FLOAT, GL_FALSE, 0, mdl->texCoords);
+		
 		glEnableVertexAttribArray(attr_pos);
 		glEnableVertexAttribArray(attr_col);
+		glEnableVertexAttribArray(attr_tex);
+
+		gl_check();
+		texture->bind(GL_TEXTURE0);
+		glUniform1i(texUniform, 0);
 
 		if (mdl->hasIndices()) {
 			glDrawElements(GL_TRIANGLES, mdl->getNumIndices(),
@@ -166,9 +203,10 @@ protected:
 		else {
 			glDrawArrays(GL_TRIANGLES, 0, mdl->getNumVertices());
 		}
-
+		
 		glDisableVertexAttribArray(attr_pos);
 		glDisableVertexAttribArray(attr_col);
+		glDisableVertexAttribArray(attr_tex);
 	}
 };
 
