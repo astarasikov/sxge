@@ -27,6 +27,11 @@ namespace sxge {
 	static inline T radToDeg(const T &x) {
 		return 180.0 * x / M_PI; 
 	}
+
+	template <class T>
+	static inline T isPowerOfTwo(const T &x) {
+		return x && !(x & (x - 1));
+	}
 	
 } //namespace sxge
 
