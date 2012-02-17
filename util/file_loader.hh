@@ -1,3 +1,6 @@
+#ifndef __SXGE_UTIL_FILE_LOADER_HH__
+#define __SXGE_UTIL_FILE_LOADER_HH__
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -31,4 +34,6 @@ protected:
 	char *data;
 };
 
-}
+} //namespace sxge
+
+#endif //__SXGE_UTIL_FILE_LOADER_HH__
