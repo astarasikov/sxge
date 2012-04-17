@@ -41,7 +41,7 @@ public:
 		return textureID;
 	}
 
-	bool bind(GLenum texture) {
+	bool buffer(GLenum texture) {
 		glBindTexture(GL_TEXTURE_2D, textureID);
 
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,

@@ -72,6 +72,8 @@ public:
 		glEnable(GL_CULL_FACE);
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_TEXTURE_2D);
+
+		texture->buffer(GL_TEXTURE0);
 	}
 
 	void keyEvent(char key, SpecialKey sk, KeyStatus ks) {
@@ -193,7 +195,8 @@ protected:
 		glEnableVertexAttribArray(attr_tex);
 
 		gl_check();
-		texture->bind(GL_TEXTURE0);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture->getTextureID());
 		glUniform1i(texUniform, 0);
 
 		if (mdl->hasIndices()) {
