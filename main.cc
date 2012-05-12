@@ -1,3 +1,4 @@
+#include <cassert>
 #include <iostream>
 #include "util/log.h"
 #include "math/vmath.hh"
@@ -133,7 +134,7 @@ public:
 	void display(void) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(1.0, 1.0, 1.0, 1.0);
-		shaderProg->bind();
+		assert(shaderProg->bind());
 		drawScene();
 	}
 	void reshape(unsigned width, unsigned height) {
