@@ -223,12 +223,19 @@ protected:
 
 	void keyPressEvent(XKeyEvent *ev, bool isDown) {
 		Screen::SpecialKey sk;
-		unsigned keycode, keysym;
+		unsigned keycode;
+		long unsigned *keysym;
+		int keysyms_per_keycode;
 		keycode = ev->keycode;
-		keysym = XKeycodeToKeysym(xDisplay, keycode, 0);
+		keysym = XGetKeyboardMapping(xDisplay, keycode,
+			1, &keysyms_per_keycode);
+
+		if (!keysyms_per_keycode) {
+			return;
+		}	
 
 		//XXX: add notification
-		if (keysym == XK_Escape) {
+		if (keysym[0] == XK_Escape) {
 			appRunning = false;
 			return;
 		}
@@ -236,7 +243,7 @@ protected:
 		Screen::KeyStatus ks = Screen::KeyStatus::KS_Up;
 		translateKeyState(ev, ks, isDown);
 
-		if (translateSpecial(keysym, sk)) {
+		if (translateSpecial(keysym[0], sk)) {
 			sxgeScreen.keyEvent(0, sk, ks);
 			return;
 		}
