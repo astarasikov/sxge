@@ -2,6 +2,7 @@
 #include <iostream>
 #include "util/log.h"
 #include "math/vmath.hh"
+#include "math/quaternion.hh"
 #include "math/utils.hh"
 #include "opengl/program.hh"
 #include "opengl/screen.hh"
@@ -10,6 +11,7 @@
 #include "opengl/window_egl_x11.hh"
 #include "scene/camera.hh"
 #include "scene/model.hh"
+#include "scene/light.hh"
 
 void printGLInfo(void) {
 	auto renderer = glGetString(GL_RENDERER);
@@ -214,7 +216,16 @@ protected:
 	}
 };
 
+static void test_quat(void) {
+	auto v3 = vmath::vec3f(1, 1, 9);
+	auto qf = vmath::Quaternion<float>(v3, 0.93214);	
+	auto qc = qf.conjugated();
+	std::cout << qc.mag() << std::endl;
+}
+
 int main() {
+	test_quat();
+
 	TestScreen screen;
 	sxge::EGL_X11_Window window(screen);
 	return 0;
