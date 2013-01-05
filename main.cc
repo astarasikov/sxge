@@ -79,7 +79,6 @@ public:
 		glEnable(GL_CULL_FACE);
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_TEXTURE_2D);
-
 	}
 
 	void keyEvent(char key, SpecialKey sk, KeyStatus ks) {
@@ -181,6 +180,7 @@ protected:
 
 		if (texture) {
 			gl_check();
+			//FIXME: make the texture store its buffered state
 			texture->buffer(GL_TEXTURE0);
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, texture->getTextureID());
@@ -205,8 +205,7 @@ protected:
 			vmath::mat4f &pv = *mProjView;
 			vmath::mat4f &xform = *(object->transform);
 			auto mvp = pv * xform;
-
-			std::cout << mvp << std::endl;
+			//auto mvp = xform * pv;
 			glUniformMatrix4fv(mMVPAttr, 1, GL_FALSE, mvp.getData());
 		}
 		else {
@@ -220,20 +219,25 @@ protected:
 		auto cube1 = new sxge::Object();
 		cube1->model = sxge::Model::cube(1.0); 
 		cube1->texture = new sxge::Texture("res/tex1.dat", 256, 256);
-		cube1->texture->buffer(GL_TEXTURE0);
 
-		//Transformation matrix
-		auto rX = vmath::mat3f::rotateX(sxge::degToRad((float)mRX));
-		auto rZ = vmath::mat3f::rotateZ(sxge::degToRad((float)mRZ));
-		auto rY = vmath::mat3f::rotateY(sxge::degToRad((float)mRY));
+		auto cube2 = new sxge::Object();
+		cube2->model = cube1->model;
+		cube2->texture = cube1->texture;
+		
+		auto rX = vmath::mat3f::rotateX(sxge::degToRad(25.0f));
+		auto rZ = vmath::mat3f::rotateZ(sxge::degToRad(40.0f));
 		auto rXrZ = rZ * rX;
-		auto rXrZrY = rY * rXrZ;
-		auto translate = vmath::vec3f(mOX, mOY,mOZ);
-		auto transform = vmath::mat4f(rXrZrY, translate);
+		auto translate = vmath::vec3f(2.0, 1.5, 0.4);
+		auto scale3 = vmath::mat3f::scale(1, 1, 1);
+		auto translated = vmath::mat4f(scale3, translate);
+		auto rot4 = vmath::mat4f(rXrZ);
+		auto transform = rot4 * translated;
+
 		cube1->transform = new vmath::mat4f(transform);
 
 		mScene = new sxge::Scene();
 		mScene->add(cube1);
+		mScene->add(cube2);
 	}
 
 	void drawScene() {
@@ -248,9 +252,19 @@ protected:
 		double aspect = (double)mWidth / mHeight;
 		auto proj = vmath::mat4f::projection(45.0, aspect, 1, 100);
 		auto view = mCamera->getMatrix();
-		auto pv = proj * view;
-		mProjView = &pv;
-
+		
+		//Transformation matrix -- FIXME: add picker to rotate
+		//objects and add camera rotation
+		auto rX = vmath::mat3f::rotateX(sxge::degToRad((float)mRX));
+		auto rZ = vmath::mat3f::rotateZ(sxge::degToRad((float)mRZ));
+		auto rY = vmath::mat3f::rotateY(sxge::degToRad((float)mRY));
+		auto rXrZ = rZ * rX;
+		auto rXrZrY = rY * rXrZ;
+		auto translate = vmath::vec3f(mOX, mOY,mOZ);
+		auto transform = vmath::mat4f(rXrZrY, translate);
+		auto mvp = proj * view * transform;
+		mProjView = &mvp;
+		
 		for (auto object : mScene->objects) {
 			drawObject(object);
 		}
