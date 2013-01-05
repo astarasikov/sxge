@@ -425,6 +425,14 @@ public:
 		return ret;
 	}
 	
+	static mat3 scale(T sx, T sy, T sz) {
+		mat3 ret = mat3();
+		ret.data[0] = sx;
+		ret.data[4] = sy;
+		ret.data[8] = sz;
+		return ret;
+	}
+	
 	vec3<T> operator*(const vec3<T> &v3) const {
 		T x, y, z;
 		x = data[0] * v3.X() + data[3] * v3.Y() + data[6] * v3.Z(); 
