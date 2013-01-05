@@ -12,6 +12,11 @@
 #include "scene/camera.hh"
 #include "scene/model.hh"
 #include "scene/light.hh"
+#include "scene/object.hh"
+#include "scene/scene.hh"
+
+#define VTX_SHADER "shaders/light.vert"
+#define FRAG_SHADER "shaders/light.frag"
 
 void printGLInfo(void) {
 	auto renderer = glGetString(GL_RENDERER);
@@ -48,35 +53,33 @@ void gl_check(void) {
 class TestScreen : public sxge::Screen {
 public:
 	TestScreen() :
-		shaderProg(NULL),
-		camera(new sxge::Camera()),
-		ox(0), oy(0), oz(-5),
-		rx(30), ry(30), rz(0),
-		mdl(sxge::Model::cube(1.0)),
-		texture(new sxge::Texture("res/tex1.dat", 256, 256))
-	{}
+		mShaderProg(NULL),
+		mCamera(new sxge::Camera()),
+		mOX(0), mOY(0), mOZ(-5),
+		mRX(30), mRY(30), mRZ(0)
+	{
+		initScene();
+	}
 
 	~TestScreen() {
-		delete shaderProg;
-		delete camera;
-		delete mdl;
-		delete texture;
+		delete mScene;
+		delete mShaderProg;
+		delete mCamera;
 	}
 
 	void init(void) {
 		printGLInfo();
-		shaderProg = new sxge::ShaderProgram();
-		shaderProg->addShaderFromFile(sxge::Shader::Vertex, 
-			"shaders/test.vert");
-		shaderProg->addShaderFromFile(sxge::Shader::Fragment, 
-			"shaders/test.frag");
-		shaderProg->link();
+		mShaderProg = new sxge::ShaderProgram();
+		mShaderProg->addShaderFromFile(sxge::Shader::Vertex, 
+			VTX_SHADER);
+		mShaderProg->addShaderFromFile(sxge::Shader::Fragment, 
+			FRAG_SHADER);
+		mShaderProg->link();
 
 		glEnable(GL_CULL_FACE);
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_TEXTURE_2D);
 
-		texture->buffer(GL_TEXTURE0);
 	}
 
 	void keyEvent(char key, SpecialKey sk, KeyStatus ks) {
@@ -85,25 +88,25 @@ public:
 
 		switch (sk) {
 			case SK_Left:
-				ox -= dt;
+				mOX -= dt;
 				break;
 			case SK_Right:
-				ox += dt;
+				mOX += dt;
 				break;
 			case SK_Up:
 				if (ks & KS_Ctrl) {
-					oz += dt;
+					mOZ += dt;
 				}
 				else {
-					oy += dt;
+					mOY += dt;
 				}
 				break;
 			case SK_Down:
 				if (ks & KS_Ctrl) {
-					oz -= dt;
+					mOZ -= dt;
 				}
 				else {
-					oy -= dt;
+					mOY -= dt;
 				}
 				break;
 			default:
@@ -111,22 +114,22 @@ public:
 		}
 		switch (key) {
 			case 'x':
-				rx = ((rx - 1) % -360);
+				mRX = ((mRX - 1) % -360);
 				break;
 			case 'X':
-				rx = ((rx + 1) % 360);
+				mRX = ((mRX + 1) % 360);
 				break;
 			case 'y':
-				ry = ((ry - 1) % -360);
+				mRY = ((mRY - 1) % -360);
 				break;
 			case 'Y':
-				ry = ((ry + 1) % -360);
+				mRY = ((mRY + 1) % -360);
 				break;
 			case 'z':
-				rz = ((rz - 1) % -360);
+				mRZ = ((mRZ - 1) % -360);
 				break;
 			case 'Z':
-				rz = ((rz + 1) % -360);
+				mRZ = ((mRZ + 1) % -360);
 				break;
 		}
 	}
@@ -136,96 +139,125 @@ public:
 	void display(void) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(1.0, 1.0, 1.0, 1.0);
-		assert(shaderProg->bind());
+		assert(mShaderProg->bind());
 		drawScene();
 	}
+
 	void reshape(unsigned width, unsigned height) {
-		this->width = width;
-		this->height = height;
-		glViewport(0, 0, width, height);
+		mWidth = width;
+		mHeight = height;
+		glViewport(0, 0, mWidth, mHeight);
 	}
 protected:
-	sxge::ShaderProgram *shaderProg;
-	sxge::Camera *camera;
+	sxge::ShaderProgram *mShaderProg;
+	sxge::Camera *mCamera;
+	sxge::Scene *mScene;
 
-	unsigned width, height;
+	unsigned mWidth, mHeight;
 
-	double ox, oy, oz;
-	int rx, ry, rz;
+	double mOX, mOY, mOZ;
+	int mRX, mRY, mRZ;
 	
-	sxge::Model *mdl;
-	sxge::Texture *texture;
+	vmath::mat4f *mProjView;
+	GLuint mPositionAttr;
+	GLuint mColorAttr;
+	GLuint mTexCoordAttr;
+	GLuint mTexUniform;
+	GLuint mMVPAttr;
+	
+	void drawModel(sxge::Model *model, sxge::Texture *texture) {
+		glVertexAttribPointer(mPositionAttr, model->getVertexStride(),
+			GL_FLOAT, GL_FALSE, 0, model->vertices);
 
-	void drawScene() {
-		GLuint attr_pos, attr_col, attr_tex, mvp_mtx;
-		GLuint texUniform;
-		GLuint pid = shaderProg->programID();
+		glVertexAttribPointer(mColorAttr, model->getColorStride(),
+			GL_FLOAT, GL_FALSE, 0, model->colors);
 
-		attr_pos = glGetAttribLocation(pid, "position");
-		attr_col = glGetAttribLocation(pid, "color");
-		attr_tex = glGetAttribLocation(pid, "texcoord");
-		texUniform = glGetUniformLocation(pid, "sTexture");
-		mvp_mtx = glGetUniformLocation(pid, "MVP");
-
-		double aspect = (double)width / height;
-		auto proj = vmath::mat4f::projection(45.0, aspect, 1, 100);
+		glVertexAttribPointer(mTexCoordAttr, model->getTexStride(),
+			GL_FLOAT, GL_FALSE, 0, model->texCoords);
 		
-		//Transformation matrix
-		auto rX = vmath::mat3f::rotateX(sxge::degToRad((float)rx));
-		auto rZ = vmath::mat3f::rotateZ(sxge::degToRad((float)rz));
-		auto rY = vmath::mat3f::rotateY(sxge::degToRad((float)ry));
-		auto rXrZ = rZ * rX;
-		auto rXrZrY = rY * rXrZ;
-		auto translate = vmath::vec3f(ox, oy, oz);
-		auto transform = vmath::mat4f(rXrZrY, translate);
-		auto view = camera->getMatrix();
+		glEnableVertexAttribArray(mPositionAttr);
+		glEnableVertexAttribArray(mColorAttr);
+		glEnableVertexAttribArray(mTexCoordAttr);
 
-		auto mvp = proj * view * transform;
+		if (texture) {
+			gl_check();
+			texture->buffer(GL_TEXTURE0);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, texture->getTextureID());
+			glUniform1i(mTexUniform, 0);
+		}
 
-		glUniformMatrix4fv(mvp_mtx, 1, GL_FALSE, mvp.getData());
-		
-		glVertexAttribPointer(attr_pos, mdl->getVertexStride(),
-			GL_FLOAT, GL_FALSE, 0, mdl->vertices);
-
-		glVertexAttribPointer(attr_col, mdl->getColorStride(),
-			GL_FLOAT, GL_FALSE, 0, mdl->colors);
-
-		glVertexAttribPointer(attr_tex, mdl->getTexStride(),
-			GL_FLOAT, GL_FALSE, 0, mdl->texCoords);
-		
-		glEnableVertexAttribArray(attr_pos);
-		glEnableVertexAttribArray(attr_col);
-		glEnableVertexAttribArray(attr_tex);
-
-		gl_check();
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture->getTextureID());
-		glUniform1i(texUniform, 0);
-
-		if (mdl->hasIndices()) {
-			glDrawElements(GL_TRIANGLES, mdl->getNumIndices(),
-				GL_UNSIGNED_INT, mdl->indices);
+		if (model->hasIndices()) {
+			glDrawElements(GL_TRIANGLES, model->getNumIndices(),
+				GL_UNSIGNED_INT, model->indices);
 		}
 		else {
-			glDrawArrays(GL_TRIANGLES, 0, mdl->getNumVertices());
+			glDrawArrays(GL_TRIANGLES, 0, model->getNumVertices());
 		}
 		
-		glDisableVertexAttribArray(attr_pos);
-		glDisableVertexAttribArray(attr_col);
-		glDisableVertexAttribArray(attr_tex);
+		glDisableVertexAttribArray(mPositionAttr);
+		glDisableVertexAttribArray(mColorAttr);
+		glDisableVertexAttribArray(mTexCoordAttr);
+	}
+
+	void drawObject(sxge::Object *object) {
+		if (object->transform) {
+			vmath::mat4f &pv = *mProjView;
+			vmath::mat4f &xform = *(object->transform);
+			auto mvp = pv * xform;
+
+			std::cout << mvp << std::endl;
+			glUniformMatrix4fv(mMVPAttr, 1, GL_FALSE, mvp.getData());
+		}
+		else {
+			glUniformMatrix4fv(mMVPAttr, 1, GL_FALSE, mProjView->getData());
+		}
+
+		drawModel(object->model, object->texture);
+	}
+
+	void initScene(void) {
+		auto cube1 = new sxge::Object();
+		cube1->model = sxge::Model::cube(1.0); 
+		cube1->texture = new sxge::Texture("res/tex1.dat", 256, 256);
+		cube1->texture->buffer(GL_TEXTURE0);
+
+		//Transformation matrix
+		auto rX = vmath::mat3f::rotateX(sxge::degToRad((float)mRX));
+		auto rZ = vmath::mat3f::rotateZ(sxge::degToRad((float)mRZ));
+		auto rY = vmath::mat3f::rotateY(sxge::degToRad((float)mRY));
+		auto rXrZ = rZ * rX;
+		auto rXrZrY = rY * rXrZ;
+		auto translate = vmath::vec3f(mOX, mOY,mOZ);
+		auto transform = vmath::mat4f(rXrZrY, translate);
+		cube1->transform = new vmath::mat4f(transform);
+
+		mScene = new sxge::Scene();
+		mScene->add(cube1);
+	}
+
+	void drawScene() {
+		GLuint pid = mShaderProg->programID();
+
+		mPositionAttr = glGetAttribLocation(pid, "position");
+		mColorAttr = glGetAttribLocation(pid, "color");
+		mTexCoordAttr = glGetAttribLocation(pid, "texcoord");
+		mTexUniform = glGetUniformLocation(pid, "sTexture");
+		mMVPAttr = glGetUniformLocation(pid, "MVP");
+
+		double aspect = (double)mWidth / mHeight;
+		auto proj = vmath::mat4f::projection(45.0, aspect, 1, 100);
+		auto view = mCamera->getMatrix();
+		auto pv = proj * view;
+		mProjView = &pv;
+
+		for (auto object : mScene->objects) {
+			drawObject(object);
+		}
 	}
 };
 
-static void test_quat(void) {
-	auto v3 = vmath::vec3f(1, 1, 9);
-	auto qf = vmath::Quaternion<float>(v3, 0.93214);	
-	auto qc = qf.conjugated();
-	std::cout << qc.mag() << std::endl;
-}
-
 int main() {
-	test_quat();
-
 	TestScreen screen;
 	sxge::EGL_X11_Window window(screen);
 	return 0;

@@ -39,6 +39,10 @@ public:
 		return *viewMatrix;
 	}
 
+	const vmath::vec3f& eyeVector() {
+		return *eye;
+	} 
+
 protected:
 	vmath::vec3f *eye;
 	vmath::vec3f *up;
