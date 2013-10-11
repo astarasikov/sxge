@@ -1,7 +1,8 @@
 APPNAME=sxge
 CXX ?= g++
 SXGE_TOPDIR=$(shell pwd)
-CXFLAGS=-std=c++0x -I$(SXGE_TOPDIR) -O0 -Wall -Werror -Wextra -pg
+CXFLAGS=-std=c++0x -I$(SXGE_TOPDIR) -O0 -pg
+#-Wall -Werror -Wextra
 DEFINES ?= 
 
 CXFILES = main.cc

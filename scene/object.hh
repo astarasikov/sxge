@@ -19,7 +19,7 @@ public:
 	typedef std::set<Object*> objectSet;
 
 	Object()
-		: subObjects(objectSet())
+		: model(NULL), texture(NULL), transform(NULL), subObjects(objectSet())
 	{}
 
 	virtual ~Object() {

@@ -163,6 +163,10 @@ protected:
 	GLuint mTexCoordAttr;
 	GLuint mTexUniform;
 	GLuint mMVPAttr;
+
+	GLuint mEyeUniform;
+	GLuint mLightUniform;
+	GLuint mNormalAttr;
 	
 	void drawModel(sxge::Model *model, sxge::Texture *texture) {
 		glVertexAttribPointer(mPositionAttr, model->getVertexStride(),
@@ -173,10 +177,19 @@ protected:
 
 		glVertexAttribPointer(mTexCoordAttr, model->getTexStride(),
 			GL_FLOAT, GL_FALSE, 0, model->texCoords);
+
+		if (model->vertexNormals) {
+			glVertexAttribPointer(mNormalAttr, 3,
+				GL_FLOAT, GL_FALSE, 0, model->vertexNormals);
+		}
 		
 		glEnableVertexAttribArray(mPositionAttr);
 		glEnableVertexAttribArray(mColorAttr);
 		glEnableVertexAttribArray(mTexCoordAttr);
+
+		if (model->vertexNormals) {
+			glEnableVertexAttribArray(mNormalAttr);
+		}
 
 		if (texture) {
 			gl_check();
@@ -195,6 +208,9 @@ protected:
 			glDrawArrays(GL_TRIANGLES, 0, model->getNumVertices());
 		}
 		
+		if (model->vertexNormals) {
+			glDisableVertexAttribArray(mNormalAttr);
+		}
 		glDisableVertexAttribArray(mPositionAttr);
 		glDisableVertexAttribArray(mColorAttr);
 		glDisableVertexAttribArray(mTexCoordAttr);
@@ -211,6 +227,9 @@ protected:
 		else {
 			glUniformMatrix4fv(mMVPAttr, 1, GL_FALSE, mProjView->getData());
 		}
+		
+		glUniform3f(mEyeUniform, 0, 0, 1);
+		glUniform3f(mLightUniform, 0, 1, 1);
 
 		drawModel(object->model, object->texture);
 	}
@@ -249,6 +268,10 @@ protected:
 		mTexUniform = glGetUniformLocation(pid, "sTexture");
 		mMVPAttr = glGetUniformLocation(pid, "MVP");
 
+		mEyeUniform = glGetUniformLocation(pid, "eye");
+		mLightUniform = glGetUniformLocation(pid, "light");
+		mNormalAttr = glGetAttribLocation(pid, "normal");
+		
 		double aspect = (double)mWidth / mHeight;
 		auto proj = vmath::mat4f::projection(45.0, aspect, 1, 100);
 		auto view = mCamera->getMatrix();

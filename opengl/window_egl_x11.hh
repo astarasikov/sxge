@@ -45,7 +45,9 @@ static EGLConfig MakeEGLConfig(EGLDisplay display) {
 
 class EGL_X11_Window {
 public:
-	EGL_X11_Window(sxge::Screen &screen) : window(0), sxgeScreen(screen) {
+	EGL_X11_Window(sxge::Screen &screen) : window(0), sxgeScreen(screen),
+		appRunning(false)
+	{
 		Window root;
 		XVisualInfo *visInfo, visTmp;
 		int numVisuals;
