@@ -79,6 +79,18 @@ public:
 		glEnable(GL_CULL_FACE);
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_TEXTURE_2D);
+		
+		GLuint pid = mShaderProg->programID();
+
+		mPositionAttr = glGetAttribLocation(pid, "position");
+		mColorAttr = glGetAttribLocation(pid, "color");
+		mTexCoordAttr = glGetAttribLocation(pid, "texcoord");
+		mTexUniform = glGetUniformLocation(pid, "sTexture");
+		mMVPAttr = glGetUniformLocation(pid, "MVP");
+
+		mEyeUniform = glGetUniformLocation(pid, "eye");
+		mLightUniform = glGetUniformLocation(pid, "light");
+		mNormalAttr = glGetAttribLocation(pid, "normal");
 	}
 
 	void keyEvent(char key, SpecialKey sk, KeyStatus ks) {
@@ -229,7 +241,7 @@ protected:
 		}
 		
 		glUniform3f(mEyeUniform, 0, 0, 1);
-		glUniform3f(mLightUniform, 0, 1, 1);
+		glUniform3f(mLightUniform, 0, 1, -1);
 
 		drawModel(object->model, object->texture);
 	}
@@ -260,18 +272,6 @@ protected:
 	}
 
 	void drawScene() {
-		GLuint pid = mShaderProg->programID();
-
-		mPositionAttr = glGetAttribLocation(pid, "position");
-		mColorAttr = glGetAttribLocation(pid, "color");
-		mTexCoordAttr = glGetAttribLocation(pid, "texcoord");
-		mTexUniform = glGetUniformLocation(pid, "sTexture");
-		mMVPAttr = glGetUniformLocation(pid, "MVP");
-
-		mEyeUniform = glGetUniformLocation(pid, "eye");
-		mLightUniform = glGetUniformLocation(pid, "light");
-		mNormalAttr = glGetAttribLocation(pid, "normal");
-		
 		double aspect = (double)mWidth / mHeight;
 		auto proj = vmath::mat4f::projection(45.0, aspect, 1, 100);
 		auto view = mCamera->getMatrix();
@@ -283,7 +283,7 @@ protected:
 		auto rY = vmath::mat3f::rotateY(sxge::degToRad((float)mRY));
 		auto rXrZ = rZ * rX;
 		auto rXrZrY = rY * rXrZ;
-		auto translate = vmath::vec3f(mOX, mOY,mOZ);
+		auto translate = vmath::vec3f(mOX, mOY, mOZ);
 		auto transform = vmath::mat4f(rXrZrY, translate);
 		auto mvp = proj * view * transform;
 		mProjView = &mvp;
