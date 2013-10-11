@@ -1,3 +1,5 @@
+#version 100
+precision mediump float;
 varying vec4 vert_color;
 varying vec2 vert_texcoord;
 
@@ -7,3 +9,4 @@ void main(void)
 {
 	gl_FragColor = texture2D(sTexture, vert_texcoord);
 }
+

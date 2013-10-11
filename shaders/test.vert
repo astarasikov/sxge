@@ -1,3 +1,6 @@
+#version 100
+precision mediump float;
+
 uniform mat4 MVP;
 attribute vec4 position;
 attribute vec4 color;
@@ -12,3 +15,4 @@ void main(void)
 	vert_color = color;
 	vert_texcoord = texcoord;
 }
+
