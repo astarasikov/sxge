@@ -1,18 +1,35 @@
 Android/EGL suport
-Qt5 + win32 Support
+Qt5 Support
+OSX + CGL support
+Rework vectors to use external data pointers
 Lighting
 Multiple light sources
+Rendering to FBO
+Normals visualization
+Geometry Shaders
 Texture/Model caching
-Model Loader
+OBJ Model Loader
+Material class
+Quaternion Camera
+Custom Allocator
 Animation
 Scripted behavior
 Font output
 HUD
 Console
-Quaternion Camera
 Octtree/BSP
-Various postprocessing effects
+Cloth simulation
+Water simulation
+Mirrors
 Basic collision detection and physics
+Ambient Occlusion
+Ray Tracing
+Normal Maps
+
+[effects]
+Bloom
+Night vision
+Cel shading
 
 [camera]
 rotate around the center of screen
