@@ -7,10 +7,92 @@
 namespace sxge {
 
 class Model {
+protected:
+	size_t nVertices;
+	size_t nIndices;
+
+	size_t vtxStride;
+	size_t colStride;
+	size_t texStride;
+
+	inline vmath::vec3f vectorForIndex(size_t index) {
+		size_t offset = index * vtxStride;
+		float x = vertices[offset];
+		float y = vertices[offset + 1];
+		float z = vertices[offset + 2];
+		return vmath::vec3f(x, y, z);
+	}
+	
+	void computeVertexNormals() {
+		vertexNormals = new float[nVertices * 3];
+		std::fill(vertexNormals, vertexNormals + nVertices * 3, 0);
+
+		using namespace vmath;
+		if (indices) {
+			size_t num_faces = nIndices / 3; //assume triangles for now
+			auto normals = new float[num_faces * 3];
+			std::fill(normals, normals + 3 * num_faces, 0);
+
+			//calculate normals for each face
+			for (size_t i = 0; i < num_faces; i++) {
+				//offset in the index array for the current face
+				size_t idx = 3 * i;
+
+				//vector v1: index[1] - index[0]
+				//vector v2: index[2] - index[0]
+				//normal: cross(v1, v2)
+				
+				vec3f p0 = vectorForIndex(indices[idx]);
+				vec3f p1 = vectorForIndex(indices[idx + 1]);
+				vec3f p2 = vectorForIndex(indices[idx + 2]);
+
+				vec3f v1 = p1 - p0;
+				vec3f v2 = p2 - p0;
+				vec3f normal = (v1.cross(v2)).norm();
+
+				normals[idx] = normal.X();
+				normals[idx + 1] = normal.Y();
+				normals[idx + 2] = normal.Z();
+
+				//for each vertex in this face
+				for (size_t vi = 0; vi < 3; vi++) {
+					size_t vnorm_idx = indices[idx + vi] * 3;
+
+					vertexNormals[vnorm_idx] += normals[idx];
+					vertexNormals[vnorm_idx + 1] += normals[idx + 1];
+					vertexNormals[vnorm_idx + 2] += normals[idx + 2];
+				}
+			}
+			
+			//normalize vertex normals
+			for (size_t i = 0; i < nVertices; i++) {
+				float x = vertexNormals[i * 3];
+				float y = vertexNormals[i * 3 + 1];
+				float z = vertexNormals[i * 3 + 2];
+				vec3f v(x, y, z);
+				vec3f n = v.norm();
+
+				vertexNormals[i * 3] = n.X();
+				vertexNormals[i * 3 + 1] = n.Y();
+				vertexNormals[i * 3 + 2] = n.Z();
+			}
+		}
+		else {
+			//XXX: aww
+		}
+	}
+
 public:
-	Model() : vertices(NULL), indices(NULL), colors(NULL), texCoords(NULL),
-		nVertices(0), nIndices(0), vtxStride(0), colStride(0), texStride(0)
-	{}
+	float *vertices;
+	unsigned *indices;
+	float *colors;
+	float *texCoords;
+	float *vertexNormals;
+
+	Model() : 
+		nVertices(0), nIndices(0), vtxStride(0), colStride(0), texStride(0),
+		vertices(NULL), indices(NULL), colors(NULL), texCoords(NULL),
+		vertexNormals(NULL) {}
 
 	virtual ~Model() {
 	}
@@ -173,21 +255,10 @@ public:
 		mdl->texCoords = mtexcoords;
 		mdl->texStride = 2;
 
+		mdl->computeVertexNormals();
+
 		return mdl;
 	}
-
-	float *vertices;
-	unsigned *indices;
-	float *colors;
-	float *texCoords;
-
-protected:
-	size_t nVertices;
-	size_t nIndices;
-
-	size_t vtxStride;
-	size_t colStride;
-	size_t texStride;
 };
 
 } //namespace sxge
