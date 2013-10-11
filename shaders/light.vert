@@ -16,14 +16,15 @@ varying vec2 vert_texcoord;
 void main(void)
 {
 	gl_Position = MVP * position;
+	vert_texcoord = texcoord;
+	
 	vec3 normal_t = mat3(MVP) * normal;
 
-	vec3 lv = light - gl_Position.xyz;
-	vec3 ev = eye - gl_Position.xyz;
+	vec3 lv = normalize(light - gl_Position.xyz);
+	vec3 ev = normalize(eye - gl_Position.xyz);
 	vec3 ref = 2.0 * dot(normal_t, lv) * normal_t - lv;
-	float blinn = max(0.0, dot(ref, normal_t));
+	float blinn = max(0.0, dot(ref, ev));
 	
 //	vert_color = vec4(light, 1.0);
 	vert_color = vec4(blinn, blinn, blinn, 1.0);
-	vert_texcoord = texcoord;
 }
