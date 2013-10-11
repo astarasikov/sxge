@@ -17,8 +17,9 @@ public:
 		size = fin.tellg();
 		fin.seekg(0, std::ios::beg);
 
-		data = new char[size];	
+		data = new char[size+1];	
 		fin.read(data, size);
+		data[size]=0;
 		fin.close();
 	}
 	
