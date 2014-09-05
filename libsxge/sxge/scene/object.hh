@@ -4,9 +4,9 @@
 #include <memory>
 #include <set>
 
-#include <math/vmath.hh>
-#include <opengl/texture.hh>
-#include <scene/model.hh>
+#include <sxge/math/vmath.hh>
+#include <sxge/opengl/texture.hh>
+#include <sxge/scene/model.hh>
 
 namespace sxge {
 

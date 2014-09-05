@@ -1,9 +1,9 @@
 #ifndef __SXGE_OPENGL_WINDOW_EGL_X11_HH__
 #define __SXGE_OPENGL_WINDOW_EGL_X11_HH__
 
-#include "opengl/gl_common.hh"
-#include "opengl/screen.hh"
-#include "util/log.h"
+#include <sxge/opengl/gl_common.hh>
+#include <sxge/opengl/screen.hh>
+#include <sxge/util/log.h"
 #include <cstring>
 
 #include <X11/Xlib.h>
@@ -78,12 +78,12 @@ public:
 
 		config = MakeEGLConfig(eglDisplay);
 
-		if (!eglGetConfigAttrib(eglDisplay, config, 
+		if (!eglGetConfigAttrib(eglDisplay, config,
 			EGL_NATIVE_VISUAL_ID, &eglVisualId))
 		{
 			err("failed to get EGL visual id");
 		}
-	
+
 		visTmp.visualid = eglVisualId;
 		visInfo = XGetVisualInfo(xDisplay, VisualIDMask, &visTmp, &numVisuals);
 		if (!visInfo) {
@@ -115,7 +115,7 @@ public:
 			None, NULL, 0, NULL);
 
 		context = eglCreateContext(eglDisplay, config, EGL_NO_CONTEXT,
-			ctx_attrs); 
+			ctx_attrs);
 		if (EGL_NO_CONTEXT == context) {
 			err("failed to create EGL context");
 		}
@@ -130,7 +130,7 @@ public:
 		if (!eglMakeCurrent(eglDisplay, surface, surface, context)) {
 			err("failed to make surface current");
 		}
-		
+
 		sxgeScreen.init();
 		eventLoop();
 	}
@@ -150,7 +150,7 @@ protected:
 	EGLNativeDisplayType xDisplay;
 	EGLDisplay eglDisplay;
 	EGLContext context;
-	EGLSurface surface; 
+	EGLSurface surface;
 	Window window;
 	sxge::Screen &sxgeScreen;
 	bool appRunning;
@@ -189,7 +189,7 @@ protected:
 				sk = Screen::SpecialKey::SK_Space;
 				return true;
 		}
-		
+
 		return false;
 	}
 
@@ -213,11 +213,11 @@ protected:
 		if (ev->state & Mod2Mask) {
 			ks = (Screen::KeyStatus)(ks | (Screen::KS_Mod2));
 		}
-		
+
 		if (ev->state & Mod3Mask) {
 			ks = (Screen::KeyStatus)(ks | (Screen::KS_Mod3));
 		}
-		
+
 		if (ev->state & Mod4Mask) {
 			ks = (Screen::KeyStatus)(ks | (Screen::KS_Mod4));
 		}
@@ -234,7 +234,7 @@ protected:
 
 		if (!keysyms_per_keycode) {
 			return;
-		}	
+		}
 
 		//XXX: add notification
 		if (keysym[0] == XK_Escape) {

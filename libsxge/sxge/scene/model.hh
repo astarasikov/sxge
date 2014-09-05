@@ -2,7 +2,7 @@
 #define __SXGE_SCENE_MODEL_HH__
 
 #include <algorithm>
-#include "math/vmath.hh"
+#include <sxge/math/vmath.hh>
 
 namespace sxge {
 
@@ -22,7 +22,7 @@ protected:
 		float z = vertices[offset + 2];
 		return vmath::vec3f(x, y, z);
 	}
-	
+
 	void computeVertexNormals() {
 		vertexNormals = new float[nVertices * 3];
 		std::fill(vertexNormals, vertexNormals + nVertices * 3, 0);
@@ -41,7 +41,7 @@ protected:
 				//vector v1: index[1] - index[0]
 				//vector v2: index[2] - index[0]
 				//normal: cross(v1, v2)
-				
+
 				vec3f p0 = vectorForIndex(indices[idx]);
 				vec3f p1 = vectorForIndex(indices[idx + 1]);
 				vec3f p2 = vectorForIndex(indices[idx + 2]);
@@ -63,7 +63,7 @@ protected:
 					vertexNormals[vnorm_idx + 2] += normals[idx + 2];
 				}
 			}
-			
+
 			//normalize vertex normals
 			for (size_t i = 0; i < nVertices; i++) {
 				float x = vertexNormals[i * 3];
@@ -89,7 +89,7 @@ public:
 	float *texCoords;
 	float *vertexNormals;
 
-	Model() : 
+	Model() :
 		nVertices(0), nIndices(0), vtxStride(0), colStride(0), texStride(0),
 		vertices(NULL), indices(NULL), colors(NULL), texCoords(NULL),
 		vertexNormals(NULL) {}
@@ -137,7 +137,7 @@ public:
 
 		const size_t nvert = 8;
 		const size_t ncol = 12;
-		
+
 		auto vertices = new float[nvert];
 		auto colors = new float[ncol];
 
@@ -169,7 +169,7 @@ public:
 		const size_t nvert = 8 * 3;
 		const size_t ntexc = 8 * 2;
 		const size_t nidx = 36;
-		
+
 		const float colors[nvert] = {
 			0, 0, 0,
 			0, 0, 1,
@@ -196,15 +196,15 @@ public:
 			//bottom
 			0, 4, 5,
 			0, 5, 1,
-		
+
 			//left
 			2, 0, 1,
 			2, 1, 3,
-			
+
 			//right
 			4, 6, 7,
 			4, 7, 5,
-			
+
 			//top
 			7, 6, 2,
 			3, 7, 2,
@@ -212,7 +212,7 @@ public:
 			//front
 			1, 5, 7,
 			1, 7, 3,
-			
+
 			//back
 			6, 4, 2,
 			2, 4, 0,
@@ -230,7 +230,7 @@ public:
 			hsize, hsize, -hsize,
 			hsize, hsize, hsize,
 		};
-		
+
 		auto mvertices = new float[nvert];
 		auto mcolors = new float[nvert];
 		auto mindices = new unsigned[nidx];

@@ -1,7 +1,7 @@
 #ifndef __SXGE_SCENE_CAMERA_HH__
 #define __SXGE_SCENE_CAMERA_HH__
 
-#include "math/vmath.hh"
+#include <sxge/math/vmath.hh>
 
 namespace sxge {
 
@@ -14,7 +14,7 @@ public:
 		viewMatrix(new vmath::mat4f()),
 		isBad(true)
 	{
-		updateMatrix();	
+		updateMatrix();
 	}
 
 	Camera(vmath::vec3f *eye, vmath::vec3f *up,
@@ -41,7 +41,7 @@ public:
 
 	const vmath::vec3f& eyeVector() {
 		return *eye;
-	} 
+	}
 
 protected:
 	vmath::vec3f *eye;

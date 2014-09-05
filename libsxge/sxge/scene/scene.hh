@@ -3,9 +3,9 @@
 
 #include <set>
 
-#include "math/vmath.hh"
-#include "scene/light.hh"
-#include "scene/object.hh"
+#include <sxge/math/vmath.hh>
+#include <sxge/scene/light.hh>
+#include <sxge/scene/object.hh>
 
 namespace sxge {
 

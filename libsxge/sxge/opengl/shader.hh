@@ -1,9 +1,9 @@
 #ifndef __SXGE_OPENGL_SHADER_HH__
 #define __SXGE_OPENGL_SHADER_HH__
 
-#include "gl_common.hh"
-#include "util/log.h"
-#include "util/file_loader.hh"
+#include <sxge/opengl/gl_common.hh>
+#include <sxge/util/log.h>
+#include <sxge/util/file_loader.hh>
 #include <string>
 
 namespace sxge {
@@ -23,13 +23,13 @@ public:
 
 	Shader(Shader::ShaderType type, const char *shaderSource) {
 		init(type);
-		compileFromString(shaderSource);	
+		compileFromString(shaderSource);
 	}
 
 	virtual ~Shader() {
 		glDeleteShader(_shaderID);
 	}
-	
+
 	Shader::ShaderType shaderType() const {
 		return _shaderType;
 	}
@@ -37,7 +37,7 @@ public:
 	GLuint shaderID() const {
 		return _shaderID;
 	}
-	
+
 	bool isCompiled() const {
 		return _isCompiled;
 	}
@@ -51,7 +51,7 @@ protected:
 	void init(Shader::ShaderType type) {
 		_shaderType = type;
 		_isCompiled = false;
-		
+
 		GLenum glShaderType;
 		switch (type) {
 			case Shader::ShaderType::Vertex:
@@ -63,10 +63,10 @@ protected:
 		}
 		_shaderID = glCreateShader(glShaderType);
 		if (!_shaderID) {
-			err("failed to create shader");	
+			err("failed to create shader");
 		}
 	}
-	
+
 	bool compileFromString(const char *src) {
 		if (isCompiled()) {
 			err("shader already compiled");
@@ -80,14 +80,14 @@ protected:
 
 		GLint result;
 		glShaderSource(_shaderID, 1, &src, NULL);
-		glCompileShader(_shaderID);		
+		glCompileShader(_shaderID);
 		glGetShaderiv(_shaderID, GL_COMPILE_STATUS, &result);
-		
+
 		if (result == GL_FALSE) {
 			err("failed to compile shader %x", _shaderID);
 			logShaderError();
 		}
-		
+
 		return false;
 	}
 

@@ -1,11 +1,12 @@
 #ifndef __SXGE_OPENGL_TEXTURE_HH__
 #define __SXGE_OPENGL_TEXTURE_HH__
 
-#include "gl_common.hh"
-#include "math/utils.hh"
-#include "util/log.h"
-#include "util/file_loader.hh"
-#include "string.h"
+#include <string>
+
+#include <sxge/opengl/gl_common.hh>
+#include <sxge/math/utils.hh>
+#include <sxge/util/log.h>
+#include <sxge/util/file_loader.hh>
 
 namespace sxge {
 
@@ -28,7 +29,7 @@ public:
 		sxge::FileLoader loader(filename);
 		init(loader.getData());
 	}
-	
+
 	virtual ~Texture() {
 		glDeleteTextures(1, &textureID);
 
@@ -42,17 +43,18 @@ public:
 	}
 
 	bool buffer(GLenum texture) {
+		glActiveTexture(texture);
 		glBindTexture(GL_TEXTURE_2D, textureID);
 
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
 			GL_UNSIGNED_BYTE, tex_data);
 
+		glGenerateMipmap(GL_TEXTURE_2D);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-		glActiveTexture(texture);
 		return false;
 	}
 protected:
@@ -80,13 +82,16 @@ protected:
 
 		glGenTextures(1, &textureID);
 		glBindTexture(GL_TEXTURE_2D, textureID);
-		
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
+
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGB,
 			GL_UNSIGNED_BYTE, raw_data);
 
 		return true;

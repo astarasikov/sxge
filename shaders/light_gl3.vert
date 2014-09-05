@@ -1,17 +1,15 @@
-#version 100
-precision mediump float;
-
+#version 150 core
 uniform mat4 MVP;
-attribute vec4 position;
-attribute vec4 color;
-attribute vec2 texcoord;
+in vec4 position;
+in vec4 color;
+in vec2 texcoord;
+in vec3 normal;
 
-attribute vec3 normal;
 uniform vec3 eye;
 uniform vec3 light;
 
-varying vec4 vert_color;
-varying vec2 vert_texcoord;
+out vec4 vert_color;
+out vec2 vert_texcoord;
 
 void main(void)
 {
@@ -25,6 +23,5 @@ void main(void)
 	vec3 ref = 2.0 * dot(normal_t, lv) * normal_t - lv;
 	float blinn = max(0.0, dot(ref, ev));
 
-//	vert_color = vec4(light, 1.0);
 	vert_color = vec4(blinn, blinn, blinn, 1.0);
 }

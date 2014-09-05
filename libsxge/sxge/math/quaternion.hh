@@ -1,7 +1,7 @@
 #ifndef __SXGE_MATH_QUATERNION_HH__
 #define __SXGE_MATH_QUATERNION_HH__
 
-#include "vmath.hh"
+#include <sxge/math/vmath.hh>
 
 namespace vmath {
 

@@ -17,16 +17,16 @@ public:
 		size = fin.tellg();
 		fin.seekg(0, std::ios::beg);
 
-		data = new char[size+1];	
+		data = new char[size+1];
 		fin.read(data, size);
 		data[size]=0;
 		fin.close();
 	}
-	
+
 	virtual ~FileLoader() {
 		delete[] data;
 	}
-	
+
 	char* getData() {
 		return data;
 	}

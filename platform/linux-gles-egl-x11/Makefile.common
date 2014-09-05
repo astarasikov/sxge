@@ -1,9 +1,9 @@
 APPNAME=sxge
 CXX ?= g++
-SXGE_TOPDIR=$(shell pwd)
-CXFLAGS=-std=c++0x -I$(SXGE_TOPDIR) -O0 -pg
-#-Wall -Werror -Wextra
-DEFINES ?= 
+SXGE_TOPDIR=$(shell pwd)/../../
+DEFINES += -I$(SXGE_TOPDIR)/libsxge
+WOPTS=-Wall -Wextra -Wpedantic
+CXFLAGS=-std=c++0x -O0 -pg $(DEFINES) $(WOPTS)
 
 CXFILES = main.cc
 OBJFILES = $(patsubst %.cc,%.o,$(CXFILES))

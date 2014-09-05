@@ -1,8 +1,8 @@
 #ifndef __SXGE_OPENGL_PROGRAM_HH__
 #define __SXGE_OPENGL_PROGRAM_HH__
 
-#include "opengl/gl_common.hh"
-#include "opengl/shader.hh"
+#include <sxge/opengl/gl_common.hh>
+#include <sxge/opengl/shader.hh>
 #include <list>
 #include <algorithm>
 
@@ -43,13 +43,13 @@ public:
 			shaderList.erase(it);
 		}
 	}
-	
+
 	bool link() {
 		if (_isLinked) {
 			err("attempting to link an already linked program");
 			return false;
 		}
-		
+
 		for (auto shader : shaderList) {
 			glAttachShader(_programID, shader->shaderID());
 		}
@@ -99,7 +99,7 @@ protected:
 	void logProgramError() {
 		GLint logLen;
 		GLsizei realLen;
-		
+
 		glGetProgramiv(_programID, GL_INFO_LOG_LENGTH, &logLen);
 		if (!logLen) {
 			err("no log for program %x", _programID);

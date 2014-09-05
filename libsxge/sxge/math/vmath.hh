@@ -19,7 +19,7 @@ public:
 	vec2(const vec2 &v) : x(v.x), y(v.y) {}
 
 	vec2() : x(0), y(0) {}
-	
+
 	T mag() const {
 		return sqrt(x * x + y * y);
 	}
@@ -54,7 +54,7 @@ public:
 	vec2 operator-(const vec2 &v2) const {
 		return vec2(x - v2.x, y - v2.y);
 	}
-	
+
 	vec2 operator*(const double &d) const {
 		return vec2(x * d, y * d);
 	}
@@ -89,11 +89,11 @@ template<class T>
 class vec3 {
 public:
 	vec3(T x, T y, T z) : x(x), y(y), z(z) {}
-	
+
 	vec3(const vec3 &v) : x(v.x), y(v.y), z(v.z) {}
 
 	vec3() : x(0), y(0), z(0) {}
-	
+
 	T mag() const {
 		return sqrt(x * x + y * y + z * z);
 	}
@@ -117,11 +117,11 @@ public:
 	vec3 operator+(const vec3 &v2) const {
 		return vec3(x + v2.x, y + v2.y, z + v2.z);
 	}
-	
+
 	vec3 operator-(const vec3 &v2) const {
 		return vec3(x - v2.x, y - v2.y, z - v2.z);
 	}
-	
+
 	vec3 operator*(const double &d) const {
 		return vec3(x * d, y * d, z * d);
 	}
@@ -137,11 +137,11 @@ public:
 	inline const T& X() const {
 		return x;
 	}
-	
+
 	inline const T& Y() const {
 		return y;
 	}
-	
+
 	inline const T& Z() const {
 		return z;
 	}
@@ -234,7 +234,7 @@ public:
 
 	mat2 operator+(const mat2 &m2) const {
 		mat2 ret;
-		for (int i = 0; i < items; i++) { 
+		for (int i = 0; i < items; i++) {
 			ret.data[i] = data[i] + m2.data[i];
 		}
 		return ret;
@@ -242,7 +242,7 @@ public:
 
 	mat2 operator-(const mat2 &m2) const {
 		mat2 ret;
-		for (int i = 0; i < items; i++) { 
+		for (int i = 0; i < items; i++) {
 			ret.data[i] = data[i] - m2.data[i];
 		}
 		return ret;
@@ -259,15 +259,15 @@ public:
 
 	vec2<T> operator*(const vec2<T> &v2) const {
 		T x, y;
-		x = data[0] * v2.X() + data[2] * v2.Y(); 
-		y = data[1] * v2.X() + data[3] * v2.Y(); 
+		x = data[0] * v2.X() + data[2] * v2.Y();
+		y = data[1] * v2.X() + data[3] * v2.Y();
 		return vec2<T>(x, y);
 	}
 
 	T* getData() {
 		return data;
 	}
-	
+
 	T det() {
 		return data[0] * data[3] - data[1] * data[2];
 	}
@@ -305,11 +305,11 @@ public:
 			data[0] = v1.X();
 			data[3] = v1.Y();
 			data[6] = v1.Z();
-			
+
 			data[1] = v2.X();
 			data[4] = v2.Y();
 			data[7] = v2.Z();
-			
+
 			data[2] = v3.X();
 			data[5] = v3.Y();
 			data[8] = v3.Z();
@@ -318,11 +318,11 @@ public:
 			data[0] = v1.X();
 			data[1] = v1.Y();
 			data[2] = v1.Z();
-			
+
 			data[3] = v2.X();
 			data[4] = v2.Y();
 			data[5] = v2.Z();
-			
+
 			data[6] = v3.X();
 			data[7] = v3.Y();
 			data[8] = v3.Z();
@@ -364,7 +364,7 @@ public:
 
 	mat3 operator+(const mat3 &m2) const {
 		mat3 ret;
-		for (int i = 0; i < items; i++) { 
+		for (int i = 0; i < items; i++) {
 			ret.data[i] = data[i] + m2.data[i];
 		}
 		return ret;
@@ -372,12 +372,12 @@ public:
 
 	mat3 operator-(const mat3 &m2) const {
 		mat3 ret;
-		for (int i = 0; i < items; i++) { 
+		for (int i = 0; i < items; i++) {
 			ret.data[i] = data[i] - m2.data[i];
 		}
 		return ret;
 	}
-	
+
 	mat3 operator*(const mat3 &m2) const {
 		mat3 ret = mat3();
 		//FIXME: i am lazy to unroll it
@@ -424,7 +424,7 @@ public:
 		ret.data[4] = c;
 		return ret;
 	}
-	
+
 	static mat3 scale(T sx, T sy, T sz) {
 		mat3 ret = mat3();
 		ret.data[0] = sx;
@@ -432,10 +432,10 @@ public:
 		ret.data[8] = sz;
 		return ret;
 	}
-	
+
 	vec3<T> operator*(const vec3<T> &v3) const {
 		T x, y, z;
-		x = data[0] * v3.X() + data[3] * v3.Y() + data[6] * v3.Z(); 
+		x = data[0] * v3.X() + data[3] * v3.Y() + data[6] * v3.Z();
 		y = data[1] * v3.X() + data[4] * v3.Y() + data[7] * v3.Z();
 		z = data[2] * v3.X() + data[5] * v3.Y() + data[8] * v3.Z();
 		return vec3<T>(x, y, z);
@@ -466,7 +466,7 @@ public:
 
 protected:
 	T data[items];
-	
+
 	void init(const T* raw_data, bool transposed) {
 		std::copy(raw_data, raw_data + items, data);
 		if (!transposed) {
@@ -528,7 +528,7 @@ public:
 
 	mat4 operator+(const mat4 &m2) const {
 		mat4 ret;
-		for (int i = 0; i < items; i++) { 
+		for (int i = 0; i < items; i++) {
 			ret.data[i] = data[i] + m2.data[i];
 		}
 		return ret;
@@ -536,7 +536,7 @@ public:
 
 	mat4 operator-(const mat4 &m2) const {
 		mat4 ret;
-		for (int i = 0; i < items; i++) { 
+		for (int i = 0; i < items; i++) {
 			ret.data[i] = data[i] - m2.data[i];
 		}
 		return ret;
@@ -558,19 +558,19 @@ public:
 
 	static mat4 rotateX(T theta) {
 		mat3<T> rx = mat3<T>::rotateX(theta);
-		return mat4(rx); 
+		return mat4(rx);
 	}
 
 	static mat4 rotateY(T theta) {
 		mat3<T> ry = mat3<T>::rotateX(theta);
-		return mat4(ry); 
+		return mat4(ry);
 	}
 
 	static mat4 rotateZ(T theta) {
 		mat3<T> rz = mat3<T>::rotateX(theta);
-		return mat4(rz); 
+		return mat4(rz);
 	}
-	
+
 	static mat4 identity() {
 		mat4 ret = mat4();
 		ret.initIdentity();
@@ -595,18 +595,18 @@ public:
 		ret.data[10] = d;
 		ret.data[11] = -1;
 		ret.data[14] = dn;
-		
+
 		return ret;
 	}
 
 	static mat4 lookAt(const vec3<T> &eye, const vec3<T> &to,
 		const vec3<T> &up) {
 		mat4 ret = identity();
-		
+
 		vec3<T> view = to - eye;
 		vec3<T> normal = (view.cross(up)).norm();
 		vec3<T> new_up = (normal.cross(view)).norm();
-	
+
 		ret.data[0] = normal.X();
 		ret.data[1] = normal.Y();
 		ret.data[2] = normal.Z();
@@ -621,7 +621,7 @@ public:
 
 		return ret;
 	}
-	
+
 	T* getData() {
 		return data;
 	}
