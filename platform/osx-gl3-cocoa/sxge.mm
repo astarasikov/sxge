@@ -51,16 +51,16 @@ void gl_check(void) {
 	}
 	switch(err) {
 		case GL_INVALID_ENUM:
-		sxge_info("invalid enum");
+		sxge_infos("invalid enum");
 		break;
 		case GL_INVALID_VALUE:
-		sxge_info("invalid value");
+		sxge_infos("invalid value");
 		break;
 		case GL_INVALID_OPERATION:
-		sxge_info("invalid operation");
+		sxge_infos("invalid operation");
 		break;
 		case GL_OUT_OF_MEMORY:
-		sxge_info("OOM");
+		sxge_infos("OOM");
 		break;
 	}
 }

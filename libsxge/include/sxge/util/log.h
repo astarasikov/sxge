@@ -16,12 +16,23 @@ extern void
 sxge_log(enum sxge_log_level level,
 const char *format, ...) __attribute__((format(printf, 2, 3)));
 
+#define SXGE_ERR_PREFIX "error at '%s':%d: "
+
+#define sxge_errs(fmt) \
+	sxge_log(SXGE_LOG_ERROR, SXGE_ERR_PREFIX fmt "\n", \
+		__func__, __LINE__)
+
+#define sxge_infos(fmt) \
+	sxge_log(SXGE_LOG_INFO, fmt "\n")
+
+#define sxge_dbgs sxge_errs
+
 #define sxge_err(fmt, ...) \
-	sxge_log(SXGE_LOG_ERROR, "error at '%s':%d: " fmt "\n", \
-		__func__, __LINE__, ##__VA_ARGS__)
+	sxge_log(SXGE_LOG_ERROR, SXGE_ERR_PREFIX fmt "\n", \
+		__func__, __LINE__, __VA_ARGS__)
 
 #define sxge_info(fmt, ...) \
-	sxge_log(SXGE_LOG_INFO, fmt "\n", ##__VA_ARGS__)
+	sxge_log(SXGE_LOG_INFO, fmt "\n", __VA_ARGS__)
 
 #define sxge_dbg sxge_err
 

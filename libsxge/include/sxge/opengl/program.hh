@@ -16,7 +16,7 @@ public:
 	ShaderProgram() : _isLinked(false) {
 		_programID = glCreateProgram();
 		if (!_programID) {
-			sxge_err("failed to create shader program");
+			sxge_errs("failed to create shader program");
 		}
 	}
 
@@ -46,7 +46,7 @@ public:
 
 	bool link() {
 		if (_isLinked) {
-			sxge_err("attempting to link an already linked program");
+			sxge_errs("attempting to link an already linked program");
 			return false;
 		}
 
@@ -59,7 +59,7 @@ public:
 		GLint status;
 		glGetProgramiv(_programID, GL_LINK_STATUS, &status);
 		if (GL_FALSE == status) {
-			sxge_err("failed to link shader program");
+			sxge_errs("failed to link shader program");
 			logProgramError();
 			return false;
 		}

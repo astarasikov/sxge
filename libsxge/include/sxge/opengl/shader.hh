@@ -63,18 +63,18 @@ protected:
 		}
 		_shaderID = glCreateShader(glShaderType);
 		if (!_shaderID) {
-			sxge_err("failed to create shader");
+			sxge_errs("failed to create shader");
 		}
 	}
 
 	bool compileFromString(const char *src) {
 		if (isCompiled()) {
-			sxge_err("shader already compiled");
+			sxge_errs("shader already compiled");
 			return false;
 		}
 
 		if (!src) {
-			sxge_err("shader source is NULL");
+			sxge_errs("shader source is NULL");
 			return false;
 		}
 

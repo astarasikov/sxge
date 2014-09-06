@@ -16,7 +16,7 @@ public:
 		: textureID(0), width(width), height(height)
 	{
 		if (!raw_data) {
-			sxge_err("Texture data is NULL");
+			sxge_errs("Texture data is NULL");
 			return;
 		}
 		init(raw_data);
@@ -67,12 +67,12 @@ protected:
 
 	bool init(char *raw_data) {
 		if (!raw_data) {
-			sxge_err("Texture data is NULL");
+			sxge_errs("Texture data is NULL");
 			return false;
 		}
 
 		if (!isPowerOfTwo(width) || !isPowerOfTwo(height)) {
-			sxge_err("Texture dimensions are not powers of two");
+			sxge_errs("Texture dimensions are not powers of two");
 			return false;
 		}
 
