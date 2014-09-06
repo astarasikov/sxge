@@ -63,18 +63,18 @@ protected:
 		}
 		_shaderID = glCreateShader(glShaderType);
 		if (!_shaderID) {
-			err("failed to create shader");
+			sxge_err("failed to create shader");
 		}
 	}
 
 	bool compileFromString(const char *src) {
 		if (isCompiled()) {
-			err("shader already compiled");
+			sxge_err("shader already compiled");
 			return false;
 		}
 
 		if (!src) {
-			err("shader source is NULL");
+			sxge_err("shader source is NULL");
 			return false;
 		}
 
@@ -84,7 +84,7 @@ protected:
 		glGetShaderiv(_shaderID, GL_COMPILE_STATUS, &result);
 
 		if (result == GL_FALSE) {
-			err("failed to compile shader %x", _shaderID);
+			sxge_err("failed to compile shader %x", _shaderID);
 			logShaderError();
 		}
 
@@ -105,7 +105,7 @@ protected:
 		GLsizei realLogLen;
 		char *log = new char[logLen];
 		glGetShaderInfoLog(_shaderID, logLen, &realLogLen, log);
-		err("shader %x log: %s", _shaderID, log);
+		sxge_err("shader %x log: %s", _shaderID, log);
 		delete[] log;
 	}
 };

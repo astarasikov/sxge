@@ -1,4 +1,5 @@
+platform/osx-gl3-cocoa/sxge
 gmon.out
 ./sxge
 *.o
-
+.DS_Store

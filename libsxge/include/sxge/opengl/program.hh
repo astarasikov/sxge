@@ -16,7 +16,7 @@ public:
 	ShaderProgram() : _isLinked(false) {
 		_programID = glCreateProgram();
 		if (!_programID) {
-			err("failed to create shader program");
+			sxge_err("failed to create shader program");
 		}
 	}
 
@@ -46,7 +46,7 @@ public:
 
 	bool link() {
 		if (_isLinked) {
-			err("attempting to link an already linked program");
+			sxge_err("attempting to link an already linked program");
 			return false;
 		}
 
@@ -59,7 +59,7 @@ public:
 		GLint status;
 		glGetProgramiv(_programID, GL_LINK_STATUS, &status);
 		if (GL_FALSE == status) {
-			err("failed to link shader program");
+			sxge_err("failed to link shader program");
 			logProgramError();
 			return false;
 		}
@@ -74,7 +74,7 @@ public:
 
 	bool bind() {
 		if (!isLinked()) {
-			err("trying to bind an unlinked program %x", _programID);
+			sxge_err("trying to bind an unlinked program %x", _programID);
 			return false;
 		}
 
@@ -102,13 +102,13 @@ protected:
 
 		glGetProgramiv(_programID, GL_INFO_LOG_LENGTH, &logLen);
 		if (!logLen) {
-			err("no log for program %x", _programID);
+			sxge_err("no log for program %x", _programID);
 			return;
 		}
 
 		char* log = new char[logLen];
 		glGetProgramInfoLog(_programID, logLen, &realLen, log);
-		err("program %x log: %s", _programID, log);
+		sxge_err("program %x log: %s", _programID, log);
 		delete[] log;
 	}
 };

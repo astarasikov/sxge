@@ -1,7 +1,7 @@
 APPNAME=sxge
 CXX ?= g++
 SXGE_TOPDIR=$(shell pwd)/../../
-DEFINES += -I$(SXGE_TOPDIR)/libsxge
+DEFINES += -I$(SXGE_TOPDIR)/libsxge/include/
 WOPTS=-Wall -Wextra -Wpedantic
 CXFLAGS=-std=c++0x -O0 -pg $(DEFINES) $(WOPTS)
 

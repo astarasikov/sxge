@@ -1,31 +1,42 @@
-APPNAME=gl3
-CC=clang++
+APPNAME=sxge
+CC?=clang
+CXX?=clang++
 SXGE_TOPDIR=$(shell pwd)/../../
-DEFINES=-DSXGE_USE_OPENGL -I$(SXGE_TOPDIR)/libsxge
+DEFINES=-DSXGE_USE_OPENGL -I$(SXGE_TOPDIR)/libsxge/include
 WOPTS=-Wall -Wpedantic
-CFLAGS=-std=c++11 -pg -O0 $(DEFINES) $(WOPTS)
+COMMON_FLAGS=-pg -O0 $(DEFINES) $(WOPTS)
+C_FLAGS=-std=c99 $(COMMON_FLAGS)
+MM_FLAGS=-std=c++11 $(COMMON_FLAGS)
+
 LDFLAGS=-framework Cocoa \
 	-framework CoreVideo \
 	-framework OpenGL
 
-CFILES = \
+MM_FILES = \
 	sxge.mm \
 	sxge_gl_controller.mm \
 	opengl_view.mm
 
-OBJFILES=$(patsubst %.mm,%.o,$(CFILES))
+C_FILES = \
+	$(SXGE_TOPDIR)/libsxge/src/sxge/util/log.c \
+	$(SXGE_TOPDIR)/libsxge/src/sxge/util/signals.c
+
+C_OBJ_FILES=$(patsubst %.c,%.o,$(C_FILES))
+MM_OBJ_FILES=$(patsubst %.mm,%.o,$(MM_FILES))
 
 all: $(APPNAME)
 
-$(APPNAME): $(OBJFILES)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $@ $(OBJFILES)
+$(APPNAME): $(MM_OBJ_FILES) $(C_OBJ_FILES)
+	$(CXX) $(LDFLAGS) $(MM_LAGS) -o $@ $(MM_OBJ_FILES) $(C_OBJ_FILES)
 
-$(OBJFILES): %.o: %.mm
-	$(CC) $(CFLAGS) -c $< -o $@
+$(MM_OBJ_FILES): %.o: %.mm
+	$(CXX) $(MM_FLAGS) -c $< -o $@
+
+$(C_OBJ_FILES): %.o: %.c
+	$(CC) $(C_FLAGS) -c $< -o $@
 
 clean:
-	rm $(APPNAME)
-	rm *.o
+	rm *.o $(APPNAME) || true
 
 run:
 	make clean

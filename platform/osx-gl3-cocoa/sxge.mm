@@ -4,6 +4,7 @@
 #import <iostream>
 
 #import <sxge/util/log.h>
+#import <sxge/util/signals.h>
 #import <sxge/math/vmath.hh>
 #import <sxge/math/quaternion.hh>
 #import <sxge/math/utils.hh>
@@ -28,7 +29,7 @@
 #define ogl(x) do { \
 	x; \
 	if (glGetError()) { \
-		info("Error at %d in '%s'", __LINE__, __func__); \
+		sxge_info("Error at %d in '%s'", __LINE__, __func__); \
 	} \
 } while (0)
 
@@ -39,10 +40,10 @@ void printGLInfo(void) {
 	auto vendor = glGetString(GL_VENDOR);
 	auto version = glGetString(GL_VERSION);
 	auto glslVersion = glGetString(GL_SHADING_LANGUAGE_VERSION);
-	info("OpenGL Vendor %s", vendor);
-	info("OpenGL Renderer %s", renderer);
-	info("OpenGL Version %s", version);
-	info("GLSL Version %s", glslVersion);
+	sxge_info("OpenGL Vendor %s", vendor);
+	sxge_info("OpenGL Renderer %s", renderer);
+	sxge_info("OpenGL Version %s", version);
+	sxge_info("GLSL Version %s", glslVersion);
 }
 
 void gl_check(void) {
@@ -52,16 +53,16 @@ void gl_check(void) {
 	}
 	switch(err) {
 		case GL_INVALID_ENUM:
-		info("%s", "invalid enum");
+		sxge_info("invalid enum");
 		break;
 		case GL_INVALID_VALUE:
-		info("%s", "invalid value");
+		sxge_info("invalid value");
 		break;
 		case GL_INVALID_OPERATION:
-		info("%s", "invalid operation");
+		sxge_info("invalid operation");
 		break;
 		case GL_OUT_OF_MEMORY:
-		info("%s", "OOM");
+		sxge_info("OOM");
 		break;
 	}
 }
@@ -112,7 +113,7 @@ public:
 		#define GET(type, var, name) do { \
 			ogl(var = glGet ## type ## Location(pid, name)); \
 			if (INVALID_GL_HANDLE(var)) { \
-				info("%s INVALID", name); \
+				sxge_info("%s INVALID", name); \
 			} \
 		} while (0)
 
@@ -185,7 +186,7 @@ public:
 		}
 	}
 	void mouseEvent(unsigned x, unsigned y, MouseButton buttons) {
-		dbg("%s:(%d,%d) %d", __func__, x, y, buttons);
+		sxge_dbg("%s:(%d,%d) %d", __func__, x, y, buttons);
 	}
 	void display(void) {
 		ogl(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
@@ -455,10 +456,13 @@ fail_cg_lock:
 @end
 
 int main(int argc, char** argv) {
+	(void)sxge_setup_posix_signals();
+
 	NSAutoreleasePool *pool = [NSAutoreleasePool new];
 	NSApplication *app = [NSApplication sharedApplication];
 	GLController *controller = [[GLController alloc] init];
 	[NSApp setDelegate:controller];
+	[app activateIgnoringOtherApps:YES];
 	[app run];
 	[pool release];
 	return 0;
