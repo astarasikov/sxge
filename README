@@ -2,4 +2,4 @@ SXGE (simple cross-platform opengl es engine) is my attempt at implementing a si
 
 Previously I have only written simple demos so this is my first real opengl project. Therefore, code will be ugly, algorithms will be stupid. Since this is an educational project, I will be implementing everything myself as opposed to using ready-made libraries like glm or qt4.
 
-Right now you need a linux (or, possibly, *BSD) box with mesa GLESv2 and EGL installed. I plan to add support for Android and GNU/Linux with non-mesa drivers (NVIDIA Tegra, ARM Mali) later.
+Right now you need a linux (or, possibly, *BSD) box with mesa GLESv2 and EGL installed or a Mac OS X 10.9

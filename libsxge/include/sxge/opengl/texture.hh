@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include <sxge/opengl/gl_common.hh>
+#include <sxge/platform/opengl/gl_common.hh>
 #include <sxge/math/utils.hh>
 #include <sxge/util/log.h>
 #include <sxge/util/file_loader.hh>

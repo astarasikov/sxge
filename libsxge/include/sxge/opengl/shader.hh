@@ -1,7 +1,7 @@
 #ifndef __SXGE_OPENGL_SHADER_HH__
 #define __SXGE_OPENGL_SHADER_HH__
 
-#include <sxge/opengl/gl_common.hh>
+#include <sxge/platform/opengl/gl_common.hh>
 #include <sxge/util/log.h>
 #include <sxge/util/file_loader.hh>
 #include <string>

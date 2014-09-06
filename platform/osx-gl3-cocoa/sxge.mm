@@ -1,5 +1,3 @@
-#import <OpenGL/gl3.h>
-
 #import <cassert>
 #import <iostream>
 

@@ -1,6 +1,5 @@
 Android/EGL suport
 Qt5 Support
-OSX + CGL support
 Rework vectors to use external data pointers
 Lighting
 Multiple light sources

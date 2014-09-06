@@ -1,7 +1,7 @@
 #ifndef __SXGE_OPENGL_WINDOW_EGL_X11_HH__
 #define __SXGE_OPENGL_WINDOW_EGL_X11_HH__
 
-#include <sxge/opengl/gl_common.hh>
+#include <sxge/platform/opengl/gl_common.hh>
 #include <sxge/opengl/screen.hh>
 #include <sxge/util/log.h"
 #include <cstring>

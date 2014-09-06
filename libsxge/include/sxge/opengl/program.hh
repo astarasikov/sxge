@@ -1,7 +1,7 @@
 #ifndef __SXGE_OPENGL_PROGRAM_HH__
 #define __SXGE_OPENGL_PROGRAM_HH__
 
-#include <sxge/opengl/gl_common.hh>
+#include <sxge/platform/opengl/gl_common.hh>
 #include <sxge/opengl/shader.hh>
 #include <list>
 #include <algorithm>

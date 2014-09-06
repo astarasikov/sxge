@@ -2,7 +2,7 @@ APPNAME=sxge
 CC?=clang
 CXX?=clang++
 SXGE_TOPDIR=$(shell pwd)/../../
-DEFINES=-DSXGE_USE_OPENGL -I$(SXGE_TOPDIR)/libsxge/include
+DEFINES=-DSXGE_USE_OPENGL -I$(SXGE_TOPDIR)/libsxge/include -I$(shell pwd)/include
 WOPTS=-Wall -Wpedantic
 COMMON_FLAGS=-pg -O0 $(DEFINES) $(WOPTS)
 C_FLAGS=-std=c99 $(COMMON_FLAGS)

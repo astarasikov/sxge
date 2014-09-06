@@ -1,0 +1,6 @@
+#ifndef __SXGE_PLATFORM_OPENGL_GL__COMMON_HH__
+#define __SXGE_PLATFORM_OPENGL_GL__COMMON_HH__
+
+#include <OpenGL/gl3.h>
+
+#endif //__SXGE_PLATFORM_OPENGL_GL__COMMON_HH__
