@@ -1,6 +1,6 @@
 APPNAME=sxge
-CC?=clang
-CXX?=clang++
+CC=clang
+CXX=clang++
 SXGE_TOPDIR=$(shell pwd)/../../
 DEFINES=-DSXGE_USE_OPENGL -I$(SXGE_TOPDIR)/libsxge/include -I$(shell pwd)/include
 WOPTS=-Wall -Wpedantic
@@ -36,7 +36,11 @@ $(C_OBJ_FILES): %.o: %.c
 	$(CC) $(C_FLAGS) -c $< -o $@
 
 clean:
+	find ../../ -name '*.o' -delete || true
 	rm *.o $(APPNAME) || true
+
+reindent:
+	clang-format -i -style=WebKit $(C_FILES) $(MM_FILES)
 
 run:
 	make clean
