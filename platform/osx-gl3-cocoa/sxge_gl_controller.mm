@@ -54,7 +54,6 @@
 
 -(void)dealloc
 {
-	[[self glView] release];
 	[super dealloc];
 }
 @end
