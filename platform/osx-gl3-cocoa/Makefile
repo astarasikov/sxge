@@ -31,7 +31,7 @@ MM_OBJ_FILES=$(patsubst %.mm,%.o,$(MM_FILES))
 all: $(APPNAME)
 
 $(APPNAME): $(MM_OBJ_FILES) $(CC_OBJ_FILES) $(C_OBJ_FILES)
-	$(CXX) $(LDFLAGS) $(MM_LAGS) -o $@ $(MM_OBJ_FILES) $(CC_OBJ_FILES) $(C_OBJ_FILES)
+	$(CXX) $(LDFLAGS) $(MM_FLAGS) -o $@ $(MM_OBJ_FILES) $(CC_OBJ_FILES) $(C_OBJ_FILES)
 
 $(MM_OBJ_FILES): %.o: %.mm
 	$(CXX) $(MM_FLAGS) -c $< -o $@
