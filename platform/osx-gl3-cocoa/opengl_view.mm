@@ -61,7 +61,7 @@ static CVReturn displayCallback(CVDisplayLinkRef displayLink,
 }
 
 -(void)windowWillClose:(NSNotification *)note {
-	CVDisplayLinkRelease(displayLink);
+	//CVDisplayLinkRelease(displayLink);
 	[[NSApplication sharedApplication] terminate:self];
 }
 @end
