@@ -13,7 +13,10 @@ namespace sxge {
 class Texture {
 public:
 	Texture(unsigned width, unsigned height, char *raw_data)
-		: textureID(0), width(width), height(height), tex_data(NULL)
+		: textureID(0), width(width), height(height)
+		#if 0
+		, tex_data(NULL)
+		#endif
 	{
 		if (!raw_data) {
 			sxge_errs("Texture data is NULL");
@@ -33,9 +36,11 @@ public:
 	virtual ~Texture() {
 		glDeleteTextures(1, &textureID);
 
+		#if 0
 		if (tex_data) {
 			delete[] tex_data;
 		}
+		#endif
 	}
 
 	GLuint getTextureID() const {
@@ -45,15 +50,15 @@ public:
 	bool buffer(GLenum texture) {
 		glActiveTexture(texture);
 		glBindTexture(GL_TEXTURE_2D, textureID);
-
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
-			GL_UNSIGNED_BYTE, tex_data);
-
+		#if 0
 		glGenerateMipmap(GL_TEXTURE_2D);
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGB,
+			GL_UNSIGNED_BYTE, tex_data);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		#endif
 
 		return false;
 	}
@@ -63,7 +68,9 @@ protected:
 
 	unsigned width;
 	unsigned height;
+	#if 0
 	char *tex_data;
+	#endif
 
 	bool init(char *raw_data) {
 		if (!raw_data) {
@@ -76,9 +83,11 @@ protected:
 			return false;
 		}
 
+		#if 0
 		size_t texSize = width * height * 3;
 		tex_data = new char[texSize];
 		std::copy(raw_data, raw_data + texSize, tex_data);
+		#endif
 
 		glGenTextures(1, &textureID);
 		glBindTexture(GL_TEXTURE_2D, textureID);
