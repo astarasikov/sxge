@@ -83,15 +83,6 @@ void Demo1_Cube::init(void) {
 		SHADER_PATH(VTX_SHADER));
 	mShaderProg->addShaderFromFile(sxge::Shader::Fragment,
 		SHADER_PATH(FRAG_SHADER));
-	mShaderProg->link();
-
-	ogl(glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
-	ogl(glEnable(GL_CULL_FACE));
-	ogl(glEnable(GL_DEPTH_TEST));
-	ogl(glEnable(GL_BLEND));
-	ogl(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-	//ogl(glEnable(GL_TEXTURE_2D));
-
 	GLuint pid = mShaderProg->programID();
 
 	GLuint attribIdx = 0;
@@ -101,10 +92,22 @@ void Demo1_Cube::init(void) {
 	ogl(glBindAttribLocation(pid, attribIdx++, "normal"));
 	ogl(glBindFragDataLocation(pid, 0, "out_color"));
 
+	mShaderProg->link();
+
+	ogl(glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
+	ogl(glEnable(GL_CULL_FACE));
+	ogl(glEnable(GL_DEPTH_TEST));
+	ogl(glEnable(GL_BLEND));
+	ogl(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+	//ogl(glEnable(GL_TEXTURE_2D));
+
 	#define GET(type, var, name) do { \
 		ogl(var = glGet ## type ## Location(pid, name)); \
 		if (INVALID_GL_HANDLE(var)) { \
 			sxge_info("%s INVALID", name); \
+		} \
+		else { \
+			sxge_info("%s:%d", name, var); \
 		} \
 	} while (0)
 
@@ -195,8 +198,7 @@ void Demo1_Cube::reshape(unsigned width, unsigned height) {
 }
 
 void Demo1_Cube::drawModel(sxge::Model *model, sxge::Texture *texture) {
-	size_t bufferElementCount = model->hasIndices() ?
-		model->getNumIndices() : model->getNumVertices();
+	size_t bufferElementCount = model->getNumVertices();
 
 	size_t vertexOffset = 0;
 	size_t colorOffset = model->getVertexStride() * bufferElementCount;
@@ -212,48 +214,56 @@ void Demo1_Cube::drawModel(sxge::Model *model, sxge::Texture *texture) {
 		mBufferSize = bufferSize;
 	}
 
-	std::copy(model->vertices, model->vertices + bufferElementCount,
+	std::copy(model->vertices,
+		model->vertices + bufferElementCount * model->getVertexStride(),
 		mBuffer + vertexOffset);
-	std::copy(model->colors, model->colors + bufferElementCount,
+	std::copy(model->colors,
+		model->colors + bufferElementCount * model->getColorStride(),
 		mBuffer + colorOffset);
-	std::copy(model->texCoords, model->texCoords + bufferElementCount,
+	std::copy(model->texCoords,
+		model->texCoords + bufferElementCount * model->getTexStride(),
 		mBuffer + texOffset);
 
 	if (model->vertexNormals) {
-		std::copy(model->vertexNormals, model->vertexNormals + bufferElementCount,
+		std::copy(model->vertexNormals,
+			model->vertexNormals + bufferElementCount * 3,
 			mBuffer + normalOffset);
 	}
 
 	ogl(glBindVertexArray(mVao));
 
 	ogl(glBindBuffer(GL_ARRAY_BUFFER, mVbo));
-	glBufferData(GL_ARRAY_BUFFER,
-		sizeof(GLfloat) * mBufferSize, mBuffer, GL_STATIC_DRAW);
+	ogl(glBufferData(GL_ARRAY_BUFFER,
+		sizeof(GLfloat) * mBufferSize, mBuffer, GL_STATIC_DRAW));
 
 	if (model->hasIndices()) {
 		ogl(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexVbo));
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+		ogl(glBufferData(GL_ELEMENT_ARRAY_BUFFER,
 			sizeof(GLfloat) * model->getNumIndices(),
-			model->indices, GL_STATIC_DRAW);
+			model->indices, GL_STATIC_DRAW));
 	}
 
 	ogl(glVertexAttribPointer(mPositionAttr, model->getVertexStride(),
-		GL_FLOAT, GL_FALSE, 0, (GLvoid*)vertexOffset));
+		GL_FLOAT, GL_FALSE, 0,
+		(GLvoid*)(sizeof(GLfloat) * vertexOffset)));
 
 	if (!INVALID_GL_HANDLE(mColorAttr)) {
 		ogl(glVertexAttribPointer(mColorAttr, model->getColorStride(),
-			GL_FLOAT, GL_FALSE, 0, (GLvoid*)colorOffset));
+			GL_FLOAT, GL_FALSE, 0,
+			(GLvoid*)(sizeof(GLfloat) * colorOffset)));
 	}
 
 	if (!INVALID_GL_HANDLE(mTexCoordAttr)) {
 		ogl(glVertexAttribPointer(mTexCoordAttr, model->getTexStride(),
-			GL_FLOAT, GL_FALSE, 0, (GLvoid*)texOffset));
+			GL_FLOAT, GL_FALSE, 0,
+			(GLvoid*)(sizeof(GLfloat) * texOffset)));
 	}
 
 	if (!INVALID_GL_HANDLE(mNormalAttr)) {
 		if (model->vertexNormals) {
 			ogl(glVertexAttribPointer(mNormalAttr, 3,
-				GL_FLOAT, GL_FALSE, 0, (GLvoid*)normalOffset));
+				GL_FLOAT, GL_FALSE, 0,
+				(GLvoid*)(sizeof(GLfloat) * normalOffset)));
 		}
 	}
 
@@ -322,7 +332,7 @@ void Demo1_Cube::drawObject(sxge::Object *object) {
 void Demo1_Cube::initScene(void) {
 	auto cube1 = new sxge::Object();
 	cube1->model = sxge::Model::cube(1.0);
-	cube1->texture = new sxge::Texture("../../res/tex1.dat", 256, 256);
+	cube1->texture = new sxge::Texture(SXGE_TOPDIR "/res/tex1.dat", 256, 256);
 
 	auto cube2 = new sxge::Object();
 	cube2->model = cube1->model;

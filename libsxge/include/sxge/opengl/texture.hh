@@ -13,7 +13,7 @@ namespace sxge {
 class Texture {
 public:
 	Texture(unsigned width, unsigned height, char *raw_data)
-		: textureID(0), width(width), height(height)
+		: textureID(0), width(width), height(height), tex_data(NULL)
 	{
 		if (!raw_data) {
 			sxge_errs("Texture data is NULL");
