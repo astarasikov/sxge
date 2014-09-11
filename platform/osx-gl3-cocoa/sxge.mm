@@ -15,8 +15,6 @@
 
 -(void)prepareOpenGL
 {
-	NSLog(@"initializeContext");
-	//screen_.init();
 }
 
 -(BOOL)acceptsFirstResponder {
@@ -24,7 +22,6 @@
 }
 
 -(void)keyDown:(NSEvent *)theEvent {
-	NSLog(@"Key Event %@", theEvent);
 	NSString *characters = [theEvent characters];
 	if ([characters length] != 1) {
 		return;
@@ -35,7 +32,6 @@
 
 -(void)renderForTime:(CVTimeStamp)time
 {
-	NSLog(@"Render");
 	if ([self lockFocusIfCanDraw] == NO) {
 		return;
 	}
