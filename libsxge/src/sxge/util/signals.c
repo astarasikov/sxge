@@ -76,7 +76,7 @@ analyzeSigsegvAddr(siginfo_t *si, void *data)
 #if defined(__APPLE__) || defined(__x86_64__)
 	mcontext_t mc = ((ucontext_t*)data)->uc_mcontext;
 	size_t rsp = mc->__ss.__rsp;
-	if (abs((size_t)si->si_addr - rsp) < 4096) {
+	if ((size_t)si->si_addr - rsp < 4096) {
 		fprintf(stderr, "SIGSEGV[%d]: stack overflow? rsp=%lx\n", getpid(), rsp);
 	}
 #endif
