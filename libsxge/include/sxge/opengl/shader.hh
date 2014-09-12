@@ -86,6 +86,7 @@ protected:
 		if (result == GL_FALSE) {
 			sxge_err("failed to compile shader %x", _shaderID);
 			logShaderError();
+			glDeleteShader(_shaderID);
 		}
 
 		return false;
