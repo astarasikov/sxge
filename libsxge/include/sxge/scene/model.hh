@@ -166,8 +166,12 @@ public:
 	}
 
 	static Model *cube(float size) {
-		const size_t nvert = 8 * 3;
-		const size_t ntexc = 8 * 2;
+		const size_t vtx_stride = 3;
+		const size_t col_stride = vtx_stride;
+		const size_t n_vertices = 8;
+		const size_t tex_stride = 2;
+		const size_t nvert = vtx_stride * n_vertices;
+		const size_t ntexc = tex_stride * n_vertices;
 		const size_t nidx = 36;
 
 		const float colors[nvert] = {
@@ -243,17 +247,17 @@ public:
 
 		Model *mdl = new Model();
 		mdl->vertices = mvertices;
-		mdl->vtxStride = 3;
-		mdl->nVertices = 8;
+		mdl->vtxStride = vtx_stride;
+		mdl->nVertices = n_vertices;
 
 		mdl->colors = mcolors;
-		mdl->colStride = 3;
+		mdl->colStride = col_stride;
 
 		mdl->indices = mindices;
 		mdl->nIndices = nidx;
 
 		mdl->texCoords = mtexcoords;
-		mdl->texStride = 2;
+		mdl->texStride = tex_stride;
 
 		mdl->computeVertexNormals();
 

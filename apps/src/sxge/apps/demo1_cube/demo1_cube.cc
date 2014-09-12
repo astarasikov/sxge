@@ -61,11 +61,25 @@ void gl_check(void) {
 }
 
 Demo1_Cube::Demo1_Cube() :
-	mShaderProg(NULL),
+	mShaderProg(nullptr),
 	mCamera(new sxge::Camera()),
+	mScene(nullptr),
+	mWidth(0), mHeight(0),
 	mOX(0), mOY(0), mOZ(-5),
 	mRX(30), mRY(30), mRZ(0),
-	mBuffer(nullptr), mBufferSize(0)
+	mBuffer(nullptr), mBufferSize(0),
+	mProjView(nullptr),
+	mPositionAttr(GL_INVALID_INDEX),
+	mColorAttr(GL_INVALID_INDEX),
+	mTexCoordAttr(GL_INVALID_INDEX),
+	mTexUniform(GL_INVALID_INDEX),
+	mMVPAttr(GL_INVALID_INDEX),
+	mEyeUniform(GL_INVALID_INDEX),
+	mLightUniform(GL_INVALID_INDEX),
+	mNormalAttr(GL_INVALID_INDEX),
+	mVao(GL_INVALID_INDEX),
+	mVbo(GL_INVALID_INDEX),
+	mIndexVbo(GL_INVALID_INDEX)
 {
 }
 
@@ -212,6 +226,7 @@ void Demo1_Cube::drawModel(sxge::Model *model, sxge::Texture *texture) {
 		}
 		mBuffer = new GLfloat[bufferSize];
 		mBufferSize = bufferSize;
+		std::fill(mBuffer, mBuffer + bufferSize, 0.0f);
 	}
 
 	std::copy(model->vertices,
@@ -331,11 +346,11 @@ void Demo1_Cube::drawObject(sxge::Object *object) {
 
 void Demo1_Cube::initScene(void) {
 	auto cube1 = new sxge::Object();
-	cube1->model = sxge::Model::cube(1.0);
+	cube1->model = sxge::Model::cube(0.3);
 	cube1->texture = new sxge::Texture(SXGE_TOPDIR "/res/tex1.dat", 256, 256);
 
 	auto cube2 = new sxge::Object();
-	cube2->model = cube1->model;
+	cube2->model = sxge::Model::cube(1.0);
 	cube2->texture = cube1->texture;
 
 	auto rX = vmath::mat3f::rotateX(sxge::degToRad(25.0f));

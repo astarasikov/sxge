@@ -167,6 +167,7 @@ public:
 	static const int items = 4;
 
 	mat2(const vec2<T> &v1, const vec2<T> &v2, bool columns) {
+		std::fill(data, data + items, 0.0);
 		if (!columns) {
 			data[0] = v1.X();
 			data[2] = v1.Y();
@@ -301,6 +302,7 @@ public:
 	mat3(const vec3<T> &v1, const vec3<T> &v2, const vec3<T> &v3,
 		bool columns)
 	{
+		std::fill(data, data + items, 0.0);
 		if (!columns) {
 			data[0] = v1.X();
 			data[3] = v1.Y();
@@ -501,10 +503,12 @@ public:
 	}
 
 	mat4(mat3<T> &rs) {
+		initZeroes();
 		fromMat3(rs);
 	}
 
 	mat4(mat3<T> &rs, const vec3<T> &t) {
+		initZeroes();
 		fromMat3(rs);
 		setTranslation(t);
 	}

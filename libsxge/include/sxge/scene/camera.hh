@@ -19,7 +19,10 @@ public:
 
 	Camera(vmath::vec3f *eye, vmath::vec3f *up,
 		vmath::vec3f *direction) :
-		eye(eye), up(up), direction(direction)
+		eye(eye),
+		up(up),
+		direction(direction),
+		viewMatrix(new vmath::mat4f())
 	{
 		updateMatrix();
 	}
