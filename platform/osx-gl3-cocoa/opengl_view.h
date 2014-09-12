@@ -9,6 +9,7 @@
 -(void)renderForTime:(CVTimeStamp)time;
 -(void)initializeContext;
 -(void)keyDown:(NSEvent*)theEvent;
+-(void)mouseMoved:(NSEvent*)theEvent;
 -(BOOL)acceptsFirstResponder;
 @end
 

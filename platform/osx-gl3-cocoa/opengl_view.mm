@@ -54,6 +54,9 @@ static CVReturn displayCallback(CVDisplayLinkRef displayLink,
 	NSLog(@"MyOpenGLViewBase: Key Event %@", theEvent);
 }
 
+-(void)mouseMoved:(NSEvent *)theEvent {
+	NSLog(@"MyOpenGLViewBase: Mouse Event %@", theEvent);
+}
 
 -(void)dealloc
 {

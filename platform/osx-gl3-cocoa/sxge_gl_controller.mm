@@ -16,6 +16,7 @@
 	[self makeFirstResponder:[self glView]];
 	[self makeKeyAndOrderFront:nil];
 	[self display];
+	self.acceptsMouseMovedEvents = YES;
 
 	return self;
 }

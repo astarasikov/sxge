@@ -6,6 +6,7 @@
 @interface SxgeView : MyOpenGLViewBase
 -(void)renderForTime:(CVTimeStamp)time;
 -(void)keyDown:(NSEvent*)theEvent;
+-(void)mouseMoved:(NSEvent*)theEvent;
 -(BOOL)acceptsFirstResponder;
 @end
 

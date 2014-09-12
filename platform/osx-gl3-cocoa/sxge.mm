@@ -21,6 +21,11 @@
 	return YES;
 }
 
+-(void)mouseMoved:(NSEvent *)theEvent {
+	NSPoint location = [theEvent locationInWindow];
+	screen_->mouseEvent(location.x, location.y, sxge::Screen::MouseButton::NONE);
+}
+
 -(void)keyDown:(NSEvent *)theEvent {
 	using namespace sxge;
 
