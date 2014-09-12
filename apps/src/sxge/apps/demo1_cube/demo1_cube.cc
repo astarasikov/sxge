@@ -17,6 +17,29 @@
 #define VTX_SHADER "light_gl3.vert"
 #define FRAG_SHADER "light_gl3.frag"
 
+#define FALLBACK_FRAGMENT_SHADER "#version 100\n" \
+	"precision mediump float;\n" \
+	"varying vec4 vert_color;\n" \
+	"\n" \
+	"void main(void)\n" \
+	"{\n" \
+	"	gl_FragColor = vert_color;\n" \
+	"}\n"
+
+#define FALLBACK_VERTEX_SHADER "#version 100\n" \
+	"precision mediump float;\n" \
+	"uniform mat4 MVP;\n" \
+	"attribute vec4 position;\n" \
+	"attribute vec4 color;\n" \
+	"\n" \
+	"varying vec4 vert_color;\n" \
+	"\n" \
+	"void main(void)\n" \
+	"{\n" \
+	"	gl_Position = MVP * position;\n" \
+	"	vert_color = color;\n" \
+	"}\n"
+
 #define ogl(x) do { \
 	x; \
 	if (glGetError()) { \
@@ -24,7 +47,7 @@
 	} \
 } while (0)
 
-#define INVALID_GL_HANDLE(x) ((x) == ((GLuint)-1))
+#define INVALID_GL_HANDLE(x) ((x) == GL_INVALID_INDEX)
 
 namespace sxge {
 
@@ -94,12 +117,20 @@ void Demo1_Cube::init(void) {
 	initScene();
 	printGLInfo();
 	mShaderProg = new sxge::ShaderProgram();
+	#ifndef ANDROID
 	mShaderProg->addShaderFromFile(sxge::Shader::Vertex,
 		SHADER_PATH(VTX_SHADER));
 	mShaderProg->addShaderFromFile(sxge::Shader::Fragment,
 		SHADER_PATH(FRAG_SHADER));
+	#else
+	mShaderProg->addShaderFromSource(sxge::Shader::Vertex,
+		FALLBACK_VERTEX_SHADER);
+	mShaderProg->addShaderFromSource(sxge::Shader::Fragment,
+		FALLBACK_FRAGMENT_SHADER);
+	#endif
 	GLuint pid = mShaderProg->programID();
 
+	#ifdef SXGE_USE_OPENGL
 	GLuint attribIdx = 0;
 	ogl(glBindAttribLocation(pid, attribIdx++, "position"));
 	ogl(glBindAttribLocation(pid, attribIdx++, "color"));
@@ -107,14 +138,16 @@ void Demo1_Cube::init(void) {
 	ogl(glBindAttribLocation(pid, attribIdx++, "normal"));
 	ogl(glBindFragDataLocation(pid, 0, "out_color"));
 
-	mShaderProg->link();
-
 	ogl(glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
+	#endif
+
 	ogl(glEnable(GL_CULL_FACE));
 	ogl(glEnable(GL_DEPTH_TEST));
 	ogl(glEnable(GL_BLEND));
 	ogl(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 	//ogl(glEnable(GL_TEXTURE_2D));
+
+	mShaderProg->link();
 
 	#define GET(type, var, name) do { \
 		ogl(var = glGet ## type ## Location(pid, name)); \
@@ -212,6 +245,11 @@ void Demo1_Cube::display(void) {
 	ogl(glClearColor(1.0, 1.0, 1.0, 1.0));
 	assert(mShaderProg->bind());
 	drawScene();
+
+	#ifdef ANDROID
+	//XXX: no input yet. add some motion
+	mRX = ((mRX - 1) % -360);
+	#endif
 }
 
 void Demo1_Cube::reshape(unsigned width, unsigned height) {
@@ -356,7 +394,9 @@ void Demo1_Cube::drawObject(sxge::Object *object) {
 void Demo1_Cube::initScene(void) {
 	auto cube1 = new sxge::Object();
 	cube1->model = sxge::Model::cube(0.3);
+	#ifndef ANDROID
 	cube1->texture = new sxge::Texture(SXGE_TOPDIR "/res/tex1.dat", 256, 256);
+	#endif
 
 	auto cube2 = new sxge::Object();
 	cube2->model = sxge::Model::cube(1.0);
