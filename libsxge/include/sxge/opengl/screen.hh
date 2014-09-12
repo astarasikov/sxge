@@ -54,7 +54,7 @@ public:
 	virtual ~Screen() {}
 	virtual void init(void) = 0;
 	virtual void keyEvent(char key, SpecialKey sk, KeyStatus ks) = 0;
-	virtual void mouseEvent(unsigned x, unsigned y, MouseButton buttons) = 0;
+	virtual void mouseEvent(float x, float y, MouseButton buttons) = 0;
 	virtual void display(void) = 0;
 	virtual void reshape(unsigned width, unsigned height) = 0;
 };

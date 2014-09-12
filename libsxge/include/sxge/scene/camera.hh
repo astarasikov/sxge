@@ -42,8 +42,17 @@ public:
 		return *viewMatrix;
 	}
 
-	const vmath::vec3f& eyeVector() {
+	const vmath::vec3f& eyeVector() const {
 		return *eye;
+	}
+
+	const vmath::vec3f& directionVector() const {
+		return *direction;
+	}
+
+	void setDirection(vmath::vec3f &vec) {
+		*direction = vec;
+		isBad = true;
 	}
 
 protected:

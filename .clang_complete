@@ -1,0 +1,5 @@
+-Ilibsxge/include/
+-Iapps/include/
+-DSXGE_USE_OPENGL=1
+-std=c++11
+

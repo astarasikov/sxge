@@ -16,7 +16,7 @@ public:
 	virtual ~Demo1_Cube();
 	virtual void init(void) override;
 	void keyEvent(char key, SpecialKey sk, KeyStatus ks) override;
-	void mouseEvent(unsigned x, unsigned y, MouseButton buttons) override;
+	void mouseEvent(float x, float y, MouseButton buttons) override;
 	void display(void) override;
 	void reshape(unsigned width, unsigned height) override;
 protected:
@@ -31,7 +31,8 @@ protected:
 
 	unsigned mWidth, mHeight;
 
-	double mOX, mOY, mOZ;
+	float mMouseX, mMouseY;
+	float mOX, mOY, mOZ;
 	int mRX, mRY, mRZ;
 
 	GLfloat *mBuffer;

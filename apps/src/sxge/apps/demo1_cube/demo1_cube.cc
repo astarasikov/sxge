@@ -65,6 +65,7 @@ Demo1_Cube::Demo1_Cube() :
 	mCamera(new sxge::Camera()),
 	mScene(nullptr),
 	mWidth(0), mHeight(0),
+	mMouseX(-1), mMouseY(-1),
 	mOX(0), mOY(0), mOZ(-5),
 	mRX(30), mRY(30), mRZ(0),
 	mBuffer(nullptr), mBufferSize(0),
@@ -194,8 +195,16 @@ void Demo1_Cube::keyEvent(char key, SpecialKey sk, KeyStatus ks) {
 	}
 }
 
-void Demo1_Cube::mouseEvent(unsigned x, unsigned y, MouseButton buttons) {
-	sxge_dbg("%s:(%d,%d) %d", __func__, x, y, buttons);
+void Demo1_Cube::mouseEvent(float x, float y, MouseButton buttons) {
+	float dx = x - mMouseX;
+	float dy = y - mMouseY;
+	auto direction = mCamera->directionVector();
+	vmath::vec3f delta(dx / mWidth, dy / mHeight, 0.0f);
+	auto new_direction = direction + delta;
+	mCamera->setDirection(new_direction);
+
+	mMouseX = x;
+	mMouseY = y;
 }
 
 void Demo1_Cube::display(void) {
