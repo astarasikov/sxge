@@ -64,11 +64,20 @@ protected:
 		glGenTextures(1, &textureID);
 		glBindTexture(GL_TEXTURE_2D, textureID);
 
+		#ifdef SXGE_USE_OPENGL
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+		enum {
+			TEXTURE_INTERNAL_FORMAT = GL_RGBA8,
+		};
+		#else
+		enum {
+			TEXTURE_INTERNAL_FORMAT = GL_RGB,
+		};
+		#endif
 
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGB,
-			GL_UNSIGNED_BYTE, raw_data);
+		glTexImage2D(GL_TEXTURE_2D, 0, TEXTURE_INTERNAL_FORMAT,
+			width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, raw_data);
 
 		glGenerateMipmap(GL_TEXTURE_2D);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
