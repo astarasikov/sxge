@@ -11,6 +11,7 @@ sxge_log(enum sxge_log_level level, const char *format, ...)
 {
 	char buf[SXGE_LOG_SIZE];
 	va_list args;
+	(void)level;
 	va_start(args, format);
 	int count = vsnprintf(buf, SXGE_LOG_SIZE, format, args);
 	va_end(args);

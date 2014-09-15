@@ -243,6 +243,8 @@ void Demo1_Cube::mouseEvent(float x, float y, MouseButton buttons) {
 
 	mMouseX = x;
 	mMouseY = y;
+
+	(void)buttons;
 }
 
 void Demo1_Cube::display(void) {

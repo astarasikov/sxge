@@ -102,6 +102,7 @@ static void handle_sigsegv(int signo, siginfo_t *si, void *data)
 	void		*buffer    [MAX_ENTRIES];
 	char **bt_strings = NULL;
 
+	(void)signo;
 	analyzeSigsegvAddr(si, data);
 
 	int n_entries = GetBacktraceEntries(buffer, MAX_ENTRIES);
