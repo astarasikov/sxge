@@ -1,14 +1,19 @@
 #ifndef __SXGE_PLATFORM_OPENGL_GL__COMMON_HH__
 #define __SXGE_PLATFORM_OPENGL_GL__COMMON_HH__
 
-#ifndef SXGE_USE_OPENGL
-	#include <GLES2/gl2.h>
-#else
-	#define GL_GLEXT_PROTOTYPES
-	#include <GL/gl.h>
-	#include <GL/glext.h>
-#endif
+#define GL_GLEXT_PROTOTYPES 1
+
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+
 #include <EGL/egl.h>
 #include <EGL/eglplatform.h>
 
+#ifndef GL_INVALID_INDEX
+#define GL_INVALID_INDEX ((GLuint)-1)
 #endif
+
+extern PFNGLGENVERTEXARRAYSOESPROC glGenVertexArrays;
+extern PFNGLBINDVERTEXARRAYOESPROC glBindVertexArray;
+
+#endif //__SXGE_PLATFORM_OPENGL_GL__COMMON_HH__

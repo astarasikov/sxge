@@ -1,6 +1,7 @@
 platform/osx-gl3-cocoa/sxge
 gmon.out
 ./sxge
+a.out
 *.o
 *.so
 *.d

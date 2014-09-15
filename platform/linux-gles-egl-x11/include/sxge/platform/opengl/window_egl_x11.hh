@@ -1,9 +1,9 @@
-#ifndef __SXGE_OPENGL_WINDOW_EGL_X11_HH__
-#define __SXGE_OPENGL_WINDOW_EGL_X11_HH__
+#ifndef __SXGE_PLATFORM_OPENGL_WINDOW_EGL_X11_HH__
+#define __SXGE_PLATFORM_OPENGL_WINDOW_EGL_X11_HH__
 
 #include <sxge/platform/opengl/gl_common.hh>
 #include <sxge/opengl/screen.hh>
-#include <sxge/util/log.h"
+#include <sxge/util/log.h>
 #include <cstring>
 
 #include <X11/Xlib.h>
@@ -32,13 +32,15 @@ static EGLConfig MakeEGLConfig(EGLDisplay display) {
 	};
 	EGLint nconfig;
 
-	if (!eglGetConfigs(display, NULL, 0, &nconfig)) {
-		err("failed to get number of EGL configs");
+	if (!eglGetConfigs(display, NULL, 0, &nconfig))
+	{
+		sxge_errs("failed to get number of EGL configs");
 	}
 
 	if (!eglChooseConfig(display, attributes, &config, 1, &nconfig)
-		|| !nconfig) {
-		err("failed to choose an EGL config");
+		|| !nconfig)
+	{
+		sxge_errs("failed to choose an EGL config");
 	}
 	return config;
 }
@@ -62,18 +64,21 @@ public:
 		};
 
 		xDisplay = XOpenDisplay(NULL);
-		if (!xDisplay) {
-			err("failed to open native X11 xDisplay");
+		if (!xDisplay)
+		{
+			sxge_errs("failed to open native X11 xDisplay");
 		}
 
 		eglDisplay = eglGetDisplay(xDisplay);
-		if (eglDisplay == EGL_NO_DISPLAY) {
-			err("failed to get EGL display");
+		if (eglDisplay == EGL_NO_DISPLAY)
+		{
+			sxge_errs("failed to get EGL display");
 		}
 
 		EGLint major, minor;
-		if (!eglInitialize(eglDisplay, &major, &minor)) {
-			err("failed to initialize display %p", eglDisplay);
+		if (!eglInitialize(eglDisplay, &major, &minor))
+		{
+			sxge_err("failed to initialize display %p", eglDisplay);
 		}
 
 		config = MakeEGLConfig(eglDisplay);
@@ -81,18 +86,20 @@ public:
 		if (!eglGetConfigAttrib(eglDisplay, config,
 			EGL_NATIVE_VISUAL_ID, &eglVisualId))
 		{
-			err("failed to get EGL visual id");
+			sxge_errs("failed to get EGL visual id");
 		}
 
 		visTmp.visualid = eglVisualId;
 		visInfo = XGetVisualInfo(xDisplay, VisualIDMask, &visTmp, &numVisuals);
-		if (!visInfo) {
-			err("failed to get visual info");
+		if (!visInfo)
+		{
+			sxge_errs("failed to get visual info");
 		}
 
 		root = RootWindow(xDisplay, DefaultScreen(xDisplay));
-		if (!root) {
-			err("no root window");
+		if (!root)
+		{
+			sxge_errs("no root window");
 		}
 
 		memset(&xattr, 0, sizeof(xattr));
@@ -104,8 +111,9 @@ public:
 		window = XCreateWindow(xDisplay, root, 0, 0, 320, 240,
 			0, visInfo->depth, InputOutput, visInfo->visual, mask, &xattr);
 
-		if (!window) {
-			err("failed to create X11 window");
+		if (!window)
+		{
+			sxge_errs("failed to create X11 window");
 		}
 
 		XFree(visInfo);
@@ -116,19 +124,22 @@ public:
 
 		context = eglCreateContext(eglDisplay, config, EGL_NO_CONTEXT,
 			ctx_attrs);
-		if (EGL_NO_CONTEXT == context) {
-			err("failed to create EGL context");
+		if (EGL_NO_CONTEXT == context)
+		{
+			sxge_errs("failed to create EGL context");
 		}
 
 		surface = eglCreateWindowSurface(eglDisplay, config,
 			window, NULL);
 
-		if (EGL_NO_SURFACE == surface) {
-			err("failed to create EGL surface");
+		if (EGL_NO_SURFACE == surface)
+		{
+			sxge_errs("failed to create EGL surface");
 		}
 
-		if (!eglMakeCurrent(eglDisplay, surface, surface, context)) {
-			err("failed to make surface current");
+		if (!eglMakeCurrent(eglDisplay, surface, surface, context))
+		{
+			sxge_errs("failed to make surface current");
 		}
 
 		sxgeScreen.init();
@@ -288,6 +299,6 @@ protected:
 	}
 };
 
-}; //namespace sxge
+} //namespace sxge
 
-#endif //__SXGE_OPENGL_WINDOW_EGL_X11_HH__
+#endif //__SXGE_PLATFORM_OPENGL_WINDOW_EGL_X11_HH__

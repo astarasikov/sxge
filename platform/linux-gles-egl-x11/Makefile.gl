@@ -1,3 +1,0 @@
-LIBS=-lGL -lEGL -lX11
-DEFINES=-DSXGE_USE_OPENGL
-include Makefile.common
