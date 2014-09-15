@@ -1,3 +1,7 @@
+#ifdef __linux__
+#define _GNU_SOURCE 1
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -73,13 +77,20 @@ enum {
 static void
 analyzeSigsegvAddr(siginfo_t *si, void *data)
 {
-#if defined(__APPLE__) || defined(__x86_64__)
+	size_t rsp = 0;
+#if defined(__APPLE__) && defined(__x86_64__)
 	mcontext_t mc = ((ucontext_t*)data)->uc_mcontext;
-	size_t rsp = mc->__ss.__rsp;
+	rsp = mc->__ss.__rsp;
+#endif
+
+#if defined(__linux__) && defined(__x86_64__)
+	mcontext_t mc = ((ucontext_t*)data)->uc_mcontext;
+	rsp = mc.gregs[REG_RSP];
+#endif
+
 	if ((size_t)si->si_addr - rsp < 4096) {
 		fprintf(stderr, "SIGSEGV[%d]: stack overflow? rsp=%lx\n", getpid(), rsp);
 	}
-#endif
 
 	if ((size_t)si->si_addr < PAGE_SIZE) {
 		fprintf(stderr, "SIGSEGV[%d]: NULL pointer dereference?\n", getpid());
@@ -134,7 +145,7 @@ setupSigsegvHandler(void)
 	return 0;
 }
 
-static int 
+static int
 initSignalStacks(void)
 {
 	stack_t		alt_stack;
