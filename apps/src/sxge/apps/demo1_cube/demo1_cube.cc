@@ -14,8 +14,13 @@
 #include <math.h>
 
 #define SHADER_PATH(name) (SXGE_TOPDIR "/shaders/" name)
-#define VTX_SHADER "light_gl3.vert"
-#define FRAG_SHADER "light_gl3.frag"
+#ifdef SXGE_USE_OPENGL
+	#define VTX_SHADER "light_gl3.vert"
+	#define FRAG_SHADER "light_gl3.frag"
+#else
+	#define VTX_SHADER "light.vert"
+	#define FRAG_SHADER "light.frag"
+#endif
 
 #define FALLBACK_FRAGMENT_SHADER "#version 100\n" \
 	"precision mediump float;\n" \
