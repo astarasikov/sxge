@@ -76,6 +76,7 @@ protected:
 				vertexNormals[i * 3 + 1] = n.Y();
 				vertexNormals[i * 3 + 2] = n.Z();
 			}
+			delete[] normals;
 		}
 		else {
 			//XXX: aww
@@ -95,6 +96,10 @@ public:
 		vertexNormals(NULL) {}
 
 	virtual ~Model() {
+		delete [] indices;
+		delete [] colors;
+		delete [] texCoords;
+		delete [] vertexNormals;
 	}
 
 	size_t getNumVertices() const {
