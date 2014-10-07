@@ -421,8 +421,8 @@ public:
 		T c = std::cos(theta);
 		T s = std::sin(theta);
 		ret.data[0] = c;
-		ret.data[3] = s;
-		ret.data[1] = -s;
+		ret.data[1] = s;
+		ret.data[3] = -s;
 		ret.data[4] = c;
 		return ret;
 	}
