@@ -6,7 +6,9 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
+#define EGL_EGLEXT_PROTOTYPES 1
 #include <EGL/egl.h>
+#include <EGL/eglext.h>
 #include <EGL/eglplatform.h>
 
 #ifndef GL_INVALID_INDEX

@@ -10,6 +10,13 @@
 #include <X11/Xutil.h>
 #include <X11/keysym.h>
 
+extern "C" {
+    void sxge_exportEglDisplayContextSurface(
+            EGLDisplay eglDisplay,
+            EGLContext context,
+            EGLSurface surface);
+}
+
 namespace sxge {
 
 static EGLConfig MakeEGLConfig(EGLDisplay display) {
@@ -142,6 +149,7 @@ public:
 			sxge_errs("failed to make surface current");
 		}
 
+        sxge_exportEglDisplayContextSurface(eglDisplay, context, surface);
 		sxgeScreen.init();
 		eventLoop();
 	}

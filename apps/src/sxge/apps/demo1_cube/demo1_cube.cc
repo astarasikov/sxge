@@ -13,6 +13,14 @@
 
 #include <math.h>
 
+#include <xf86drm.h>
+
+extern "C" {
+#include "vaapi-recorder.h"
+}
+#include <sys/stat.h>
+#include <fcntl.h>
+
 #define SHADER_PATH(name) (SXGE_TOPDIR "/shaders/" name)
 #ifdef SXGE_USE_OPENGL
 	#define VTX_SHADER "light_gl3.vert"
@@ -49,10 +57,149 @@
 	x; \
 	if (glGetError()) { \
 		sxge_info("Error at %d in '%s'", __LINE__, __func__); \
+        exit(-1); \
 	} \
 } while (0)
 
 #define INVALID_GL_HANDLE(x) ((x) == GL_INVALID_INDEX)
+
+static int getDrmFd(void)
+{
+    struct stat stat_card0 = {};
+    if (stat("/dev/dri/card0", &stat_card0)) {
+        perror("stat");
+        goto fail;
+    }
+
+    for (int fd = 0; fd < 16; fd++) {
+        char buf[200] = {};
+        sprintf(buf, "/dev/fd/%d", fd);
+
+        struct stat stat_cur = {};
+
+        if (stat(buf, &stat_cur)) {
+            sxge_err("fail at '%s'", buf);
+            continue;
+        }
+
+        if (stat_cur.st_dev == stat_card0.st_dev) {
+            sxge_info("found DRM fd=%d", fd);
+            return fd;
+        }
+    }
+
+fail:
+    sxge_errs("Failed to get DRM fd");
+    return -1;
+}
+
+static struct vaapi_recorder *g_Recorder;
+
+static GLuint _fb_texture;
+
+static EGLDisplay _egl_display;
+static EGLContext _egl_context;
+static EGLSurface _egl_surface;
+
+static EGLImageKHR _egl_image;
+static int _drm_fd;
+
+static EGLint _mesa_name;
+static EGLint _mesa_handle;
+static EGLint _mesa_stride;
+
+enum {
+    FRAME_WIDTH = 1024,
+    FRAME_HEIGHT = 720,
+};
+
+extern "C" void sxge_exportEglDisplayContextSurface(
+            EGLDisplay display,
+            EGLContext context,
+            EGLSurface surface)
+{
+    _egl_display = display;
+    _egl_context = context;
+    _egl_surface = surface;
+}
+
+static void InitVaapiBridge(void)
+{
+    _drm_fd = getDrmFd();
+    if (!g_Recorder) {
+            g_Recorder = vaapi_recorder_create(_drm_fd,
+                    FRAME_WIDTH, FRAME_HEIGHT, "/tmp/out.h264");
+    }
+
+    ogl(glGenTextures(1, &_fb_texture));
+    sxge_info("%s: _fb_texture=%08x", __func__, _fb_texture);
+    ogl(glActiveTexture(GL_TEXTURE0));
+    ogl(glBindTexture(GL_TEXTURE_2D, _fb_texture));
+    ogl(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, FRAME_WIDTH, FRAME_HEIGHT,
+                0, GL_RGB, GL_UNSIGNED_BYTE, NULL));
+
+    ogl(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+    ogl(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+    ogl(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
+    ogl(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
+
+    GLuint frameBuffer;
+    ogl(glGenFramebuffers(1, &frameBuffer));
+    ogl(glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer));
+    sxge_info("%s: frameBuffer=%08x", __func__, frameBuffer);
+
+    ogl(glFramebufferTexture2D(GL_FRAMEBUFFER,
+                GL_COLOR_ATTACHMENT0,
+                GL_TEXTURE_2D,
+                _fb_texture,
+                0));
+
+    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE)
+    {
+        ogl(sxge_errs("failed to construct framebuffer"));
+    }
+
+    ogl(glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer));
+    ogl(glViewport(0, 0, FRAME_WIDTH, FRAME_HEIGHT));
+
+    ogl(_egl_image = eglCreateImageKHR
+        (_egl_display, _egl_context, EGL_GL_TEXTURE_2D_KHR,
+         (EGLClientBuffer)(size_t)_fb_texture, NULL));
+    if (!_egl_image) {
+        sxge_errs("failed to create EGLImage");
+        exit(-1);
+    }
+    sxge_info("%s: _egl_image=%p", __func__, _egl_image);
+
+    EGLBoolean ok;
+    ogl(ok = eglExportDRMImageMESA(
+                _egl_display,
+                _egl_image,
+                &_mesa_name,
+                &_mesa_handle,
+                &_mesa_stride));
+    if (!ok) {
+        sxge_errs("failed to export DRM image");
+    }
+    else {
+        sxge_info("name=%08x handle=%08x stride=%d",
+                _mesa_name, _mesa_handle, _mesa_stride);
+    }
+}
+
+static void CaptureFrame(void)
+{
+    if (g_Recorder) {
+        int prime_fd = 0;
+        if (drmPrimeHandleToFD(_drm_fd, _mesa_handle, DRM_CLOEXEC, &prime_fd))
+        {
+            sxge_errs("drmPrimeHandleToFD failed");
+            exit(-1);
+        }
+        vaapi_recorder_frame(g_Recorder, prime_fd, FRAME_WIDTH * 4);
+    }
+}
 
 namespace sxge {
 
@@ -179,6 +326,8 @@ void Demo1_Cube::init(void) {
 	ogl(glBindVertexArray(mVao));
 	ogl(glGenBuffers(1, &mVbo));
 	ogl(glGenBuffers(1, &mIndexVbo));
+
+    InitVaapiBridge();
 }
 
 void Demo1_Cube::keyEvent(char key, SpecialKey sk, KeyStatus ks) {
@@ -253,10 +402,10 @@ void Demo1_Cube::display(void) {
 	assert(mShaderProg->bind());
 	drawScene();
 
-	#ifdef ANDROID
 	//XXX: no input yet. add some motion
 	mRX = ((mRX - 1) % -360);
-	#endif
+
+    CaptureFrame();
 }
 
 void Demo1_Cube::reshape(unsigned width, unsigned height) {

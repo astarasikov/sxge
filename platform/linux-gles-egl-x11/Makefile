@@ -5,7 +5,8 @@ SXGE_TOPDIR=$(shell pwd)/../../
 DEFINES=-DSXGE_USE_GLES -DSXGE_TOPDIR=\"$(SXGE_TOPDIR)\" -I$(SXGE_TOPDIR)/libsxge/include -I$(SXGE_TOPDIR)/apps/include -I$(shell pwd)/include
 WOPTS=-Wall -Wextra -Wpedantic
 OPTIMIZATION_FLAGS=-pg -O0
-LDFLAGS=-lGLESv2 -lEGL -lX11
+DEFINES+=-I/usr/include/libdrm
+LDFLAGS=-lGLESv2 -lEGL -lX11 -lva -lva-drm -lpthread -ldrm
 
 ifeq ($(WITH_SANITIZER),1)
 OPTIMIZATION_FLAGS=-g3 -Os -fno-omit-frame-pointer -fno-inline-functions -fno-inline
@@ -22,7 +23,8 @@ CC_FILES = \
 
 C_FILES = \
 	$(SXGE_TOPDIR)/libsxge/src/sxge/util/log.c \
-	$(SXGE_TOPDIR)/libsxge/src/sxge/util/signals.c
+	$(SXGE_TOPDIR)/libsxge/src/sxge/util/signals.c \
+	$(SXGE_TOPDIR)/apps/src/sxge/apps/demo1_cube/vaapi-recorder.c
 
 C_OBJ_FILES=$(patsubst %.c,%.o,$(C_FILES))
 CC_OBJ_FILES=$(patsubst %.cc,%.o,$(CC_FILES))
