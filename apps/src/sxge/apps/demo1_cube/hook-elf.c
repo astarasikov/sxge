@@ -136,7 +136,7 @@ int replaceSymbol(const char* libname, const char *path, size_t newFunc)
     Elf64_Shdr *dynsym = NULL;
     
     Elf64_Shdr *rel_plt = NULL;
-    Elf64_Rel *rel_plt_table = NULL;
+    Elf64_Rela *rel_plt_table = NULL;
     
     Elf64_Sym *symbol = NULL;
     size_t symbol_idx = 0;
@@ -169,9 +169,9 @@ int replaceSymbol(const char* libname, const char *path, size_t newFunc)
                 section_header,
                 ".rela.plt"));
     
-    CHECK(rel_plt_table = (Elf64_Rel*)(lib_in_process + rel_plt->sh_addr));
+    CHECK(rel_plt_table = (Elf64_Rela*)(lib_in_process + rel_plt->sh_addr));
 
-    for (i = 0; i < rel_plt->sh_size / sizeof(Elf64_Rel); i++)
+    for (i = 0; i < rel_plt->sh_size / sizeof(Elf64_Rela); i++)
     {
         if (ELF64_R_SYM(rel_plt_table[i].r_info) != symbol_idx)
         {
