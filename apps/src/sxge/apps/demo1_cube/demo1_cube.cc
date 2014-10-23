@@ -12,6 +12,7 @@
 #include <sxge/apps/apps.hh>
 
 #include <math.h>
+#include <stropts.h>
 
 #include <xf86drm.h>
 
@@ -109,8 +110,8 @@ static EGLint _mesa_handle;
 static EGLint _mesa_stride;
 
 enum {
-    FRAME_WIDTH = 1024,
-    FRAME_HEIGHT = 720,
+    FRAME_WIDTH = 1920,
+    FRAME_HEIGHT = 1080,
 };
 
 extern "C" void sxge_exportEglDisplayContextSurface(
@@ -123,6 +124,18 @@ extern "C" void sxge_exportEglDisplayContextSurface(
     _egl_surface = surface;
 }
 
+extern "C" int myIoctl(int fd, unsigned long request, void *arg)
+{
+    fprintf(stderr, "myIoctl: fd=%d, request=%lu\n", fd, request);
+    fflush(stderr);
+
+    int rc = ioctl(fd, request, arg);
+    return rc;
+}
+
+extern "C" int
+replaceSymbol(const char *dl_name, const char *path, size_t function);
+
 static void InitVaapiBridge(void)
 {
     _drm_fd = getDrmFd();
@@ -131,17 +144,27 @@ static void InitVaapiBridge(void)
                     FRAME_WIDTH, FRAME_HEIGHT, "/tmp/out.h264");
     }
 
+    sxge_info("%s: generating textures", __func__);
     ogl(glGenTextures(1, &_fb_texture));
     sxge_info("%s: _fb_texture=%08x", __func__, _fb_texture);
     ogl(glActiveTexture(GL_TEXTURE0));
+    sxge_info("%s: done glActiveTexture(GL_ACTIVE_TEXTURE0)", __func__);
     ogl(glBindTexture(GL_TEXTURE_2D, _fb_texture));
+    sxge_info("%s: texture bind done", __func__);
+
+    replaceSymbol(
+            "libdrm_intel.so",
+            "/usr/lib/libdrm_intel.so",
+            (size_t)myIoctl);
     ogl(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, FRAME_WIDTH, FRAME_HEIGHT,
                 0, GL_RGB, GL_UNSIGNED_BYTE, NULL));
+    sxge_info("%s: glTexImage2D done", __func__);
 
     ogl(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
     ogl(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
     ogl(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
     ogl(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
+    sxge_info("%s: glTexParameteri done", __func__);
 
     GLuint frameBuffer;
     ogl(glGenFramebuffers(1, &frameBuffer));
@@ -153,6 +176,7 @@ static void InitVaapiBridge(void)
                 GL_TEXTURE_2D,
                 _fb_texture,
                 0));
+    sxge_info("%s: glFramebufferTexture2D done", __func__);
 
     GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE)
@@ -163,6 +187,7 @@ static void InitVaapiBridge(void)
     ogl(glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer));
     ogl(glViewport(0, 0, FRAME_WIDTH, FRAME_HEIGHT));
 
+    sxge_info("%s: creating EGLImage", __func__);
     ogl(_egl_image = eglCreateImageKHR
         (_egl_display, _egl_context, EGL_GL_TEXTURE_2D_KHR,
          (EGLClientBuffer)(size_t)_fb_texture, NULL));
@@ -411,7 +436,7 @@ void Demo1_Cube::display(void) {
 void Demo1_Cube::reshape(unsigned width, unsigned height) {
 	mWidth = width;
 	mHeight = height;
-	ogl(glViewport(0, 0, mWidth, mHeight));
+	//ogl(glViewport(0, 0, mWidth, mHeight));
 }
 
 void Demo1_Cube::drawModel(sxge::Model *model, sxge::Texture *texture) {
