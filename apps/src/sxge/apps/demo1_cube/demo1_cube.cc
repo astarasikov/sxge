@@ -15,6 +15,8 @@
 #include <stropts.h>
 
 #include <xf86drm.h>
+#include <i915_drm.h>
+#include <drm.h>
 
 extern "C" {
 #include "vaapi-recorder.h"
@@ -97,15 +99,8 @@ fail:
 static struct vaapi_recorder *g_Recorder;
 
 static GLuint _fb_texture;
-
-static EGLDisplay _egl_display;
-static EGLContext _egl_context;
-static EGLSurface _egl_surface;
-
-static EGLImageKHR _egl_image;
 static int _drm_fd;
 
-static EGLint _mesa_name;
 static EGLint _mesa_handle;
 static EGLint _mesa_stride;
 
@@ -114,20 +109,48 @@ enum {
     FRAME_HEIGHT = 1080,
 };
 
-extern "C" void sxge_exportEglDisplayContextSurface(
-            EGLDisplay display,
-            EGLContext context,
-            EGLSurface surface)
+struct intel_bo_hook_closure {
+    unsigned long bo_handle;
+    unsigned long stride;
+};
+
+static intel_bo_hook_closure *bo_hook_closure;
+
+static void hookDrmIoctl(unsigned long request, void *arg)
 {
-    _egl_display = display;
-    _egl_context = context;
-    _egl_surface = surface;
+    unsigned long cmd = _IOC_NR(request) - DRM_COMMAND_BASE;
+    switch (cmd) {
+        case DRM_I915_GEM_PWRITE:
+            fprintf(stderr, "I915_GEM_PWRITE\n");
+            break;
+        case DRM_I915_GEM_SET_TILING:
+            fprintf(stderr, "I915_GEM_SET_TILING\n");
+            {
+                struct drm_i915_gem_set_tiling *tiling = NULL;
+                tiling = (struct drm_i915_gem_set_tiling*) arg;
+
+                if (bo_hook_closure) {
+                    bo_hook_closure->bo_handle = tiling->handle;
+                    bo_hook_closure->stride = tiling->stride;
+                }
+
+                fprintf(stderr, "BO handle=%x, stride=%d\n",
+                        tiling->handle, tiling->stride);
+            }
+            break;
+        default:
+            fprintf(stderr, "Unknown DRM request %zu\n", cmd);
+    }
 }
 
 extern "C" int myIoctl(int fd, unsigned long request, void *arg)
 {
     fprintf(stderr, "myIoctl: fd=%d, request=%lu\n", fd, request);
     fflush(stderr);
+
+    if (_IOC_TYPE(request) == DRM_IOCTL_BASE) {
+        hookDrmIoctl(request, arg);
+    }
 
     int rc = ioctl(fd, request, arg);
     return rc;
@@ -156,9 +179,17 @@ static void InitVaapiBridge(void)
             "libdrm_intel.so",
             "/usr/lib/libdrm_intel.so",
             (size_t)myIoctl);
+
+    intel_bo_hook_closure closure;
+    bo_hook_closure = &closure;
+
     ogl(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, FRAME_WIDTH, FRAME_HEIGHT,
                 0, GL_RGB, GL_UNSIGNED_BYTE, NULL));
-    sxge_info("%s: glTexImage2D done", __func__);
+    bo_hook_closure = NULL;
+    sxge_info("%s: glTexImage2D done handle=%lx", __func__, closure.bo_handle);
+
+    _mesa_handle = closure.bo_handle;
+    _mesa_stride = closure.stride;
 
     ogl(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
     ogl(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
@@ -186,31 +217,6 @@ static void InitVaapiBridge(void)
 
     ogl(glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer));
     ogl(glViewport(0, 0, FRAME_WIDTH, FRAME_HEIGHT));
-
-    sxge_info("%s: creating EGLImage", __func__);
-    ogl(_egl_image = eglCreateImageKHR
-        (_egl_display, _egl_context, EGL_GL_TEXTURE_2D_KHR,
-         (EGLClientBuffer)(size_t)_fb_texture, NULL));
-    if (!_egl_image) {
-        sxge_errs("failed to create EGLImage");
-        exit(-1);
-    }
-    sxge_info("%s: _egl_image=%p", __func__, _egl_image);
-
-    EGLBoolean ok;
-    ogl(ok = eglExportDRMImageMESA(
-                _egl_display,
-                _egl_image,
-                &_mesa_name,
-                &_mesa_handle,
-                &_mesa_stride));
-    if (!ok) {
-        sxge_errs("failed to export DRM image");
-    }
-    else {
-        sxge_info("name=%08x handle=%08x stride=%d",
-                _mesa_name, _mesa_handle, _mesa_stride);
-    }
 }
 
 static void CaptureFrame(void)
