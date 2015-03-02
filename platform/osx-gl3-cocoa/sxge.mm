@@ -128,7 +128,7 @@ int main(int argc, char** argv) {
 	NSAutoreleasePool *pool = [NSAutoreleasePool new];
 	NSApplication *app = [NSApplication sharedApplication];
 	GLController *controller = [[GLController alloc] init];
-	[NSApp setDelegate:controller];
+	//[NSApp setDelegate:controller];
 	[app activateIgnoringOtherApps:YES];
 	[app run];
 	[pool release];
