@@ -1,5 +1,6 @@
 #include <cassert>
 #include <iostream>
+#include <vector>
 
 #include <sxge/util/log.h>
 #include <sxge/math/vmath.hh>
@@ -55,6 +56,109 @@
 #define INVALID_GL_HANDLE(x) ((x) == GL_INVALID_INDEX)
 
 namespace sxge {
+
+static float gOX = -1.0;
+static float gOY = -0.5;
+static float gRY = 30.0;
+
+typedef long long anitime_t;
+
+#include <sys/time.h>
+static anitime_t wall_time(void)
+{
+	timeval t;
+	gettimeofday(&t, NULL);
+	return (t.tv_sec * 1000000) + t.tv_usec;
+}
+
+struct AnimationTarget {
+	virtual void set(float value) = 0;
+};
+
+struct Interpolator {
+	virtual float eval(float from, float to, float progress) = 0;
+};
+
+static struct LinearInterpolator : Interpolator {
+	virtual float eval(float from, float to, float progress) {
+		return from + ((to - from) * progress);
+	}
+} gLinearInterpolator = {};
+
+static struct SineInterpolator : Interpolator {
+	virtual float eval(float from, float to, float progress) {
+		return from + ((to - from) * 0.5 * (1 + sin(progress * M_PI)));
+	}
+} gSineInterpolator = {};
+
+static struct EaseOutBounceInterpolator : Interpolator {
+	virtual float eval(float from, float to, float progress) {
+		float c = (to - from);
+		float b = from;
+		float t = progress;
+
+		if (t < (1/2.75)) {
+			return c*(7.5625*t*t) + b;
+		} else if (t < (2/2.75)) {
+			return c*(7.5625*(t-=(1.5/2.75))*t + .75) + b;
+		} else if (t < (2.5/2.75)) {
+			return c*(7.5625*(t-=(2.25/2.75))*t + .9375) + b;
+		} else {
+			return c*(7.5625*(t-=(2.625/2.75))*t + .984375) + b;
+		}
+	}
+} gEaseOutBounceInterpolator;
+
+struct Animation {
+	enum mode {
+		Relative,
+		Absolute,
+	};
+	anitime_t time_start;
+	anitime_t time_end;
+
+	float from;
+	float to;
+
+	AnimationTarget *target;
+	Interpolator *interpolator;
+};
+
+struct Timeline {
+	std::vector<Animation *> animations;
+	anitime_t time_start;
+
+	void tick(anitime_t time) {
+		if (!time_start) {
+			time_start = wall_time();
+		}
+
+		for (auto *a : animations) {
+			if (!a->interpolator || !a->target) {
+				continue;
+			}
+
+			anitime_t position = (time - time_start) - (a->time_start);
+			anitime_t duration = (a->time_end - a->time_start);
+
+			float progress = (float)position / duration;
+
+			if (progress < 0) {
+				continue;
+			}
+
+			float from = a->from;
+			float to = a->to;
+
+			if ((int)floor(progress) & 1) {
+				from = a->to;
+				to = a->from;
+			}
+
+			a->target->set(a->interpolator->eval(from, to, fmodf(progress, 1.0f)));
+		}
+	}
+};
 
 void printGLInfo(void) {
 	auto renderer = glGetString(GL_RENDERER);
@@ -234,6 +338,8 @@ void Demo1_Cube::keyEvent(char key, SpecialKey sk, KeyStatus ks) {
 }
 
 void Demo1_Cube::mouseEvent(float x, float y, MouseButton buttons) {
+	return;
+
 	float dx = x - mMouseX;
 	float dy = y - mMouseY;
 	auto direction = mCamera->directionVector();
@@ -251,7 +357,104 @@ void Demo1_Cube::display(void) {
 	ogl(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 	ogl(glClearColor(1.0, 1.0, 1.0, 1.0));
 	assert(mShaderProg->bind());
+
+	mOX = gOX;
+	mOY = gOY;
+	mRY = gRY;
+
 	drawScene();
+
+	static anitime_t lastVsyncTime = 0;
+	anitime_t thisVsyncTime = wall_time();
+	anitime_t dt = thisVsyncTime - lastVsyncTime;
+
+	//printf("dt: %d\n", dt);
+
+	static struct {
+		enum {
+			vsync_buf_size = 3,
+		};
+
+		anitime_t buffer[vsync_buf_size];
+		size_t idx;
+
+		anitime_t predict(anitime_t now) {
+			buffer[(idx++) % vsync_buf_size] = now;
+
+			anitime_t tmp = 0;
+			for (anitime_t t : buffer) {
+				tmp += t;
+			}
+			return tmp / vsync_buf_size;
+		};
+	} vsyncEstimator;
+
+	/**************************************************************************
+	 * Animate X
+	 *************************************************************************/
+	static struct sxTarget : AnimationTarget {
+		virtual void set(float value) {
+			gOX = value;
+		}
+	} xTarget;
+
+	static struct Animation xAnimation = {
+		time_start:0,
+		time_end:(16500) * 100,
+		from:-1.0,
+		to:1.0,
+		target:&xTarget,
+		interpolator:&gEaseOutBounceInterpolator,
+		//interpolator:&gLinearInterpolator,
+	};
+	/**************************************************************************
+	 * Animate Y
+	 *************************************************************************/
+	static struct syTarget : AnimationTarget {
+		virtual void set(float value) {
+			gOY = value;
+		}
+	} yTarget;
+
+	static struct Animation yAnimation = {
+		time_start:0,
+		time_end:(16500) * (100),
+		from:-0.5,
+		to:0.5,
+		target:&yTarget,
+		interpolator:&gSineInterpolator,
+	};
+
+	/**************************************************************************
+	 * Animate Rotation
+	 *************************************************************************/
+	static struct srotTarget : AnimationTarget {
+		virtual void set(float value) {
+			gRY = value;
+		}
+	} rotTarget;
+
+	static struct Animation rotAnimation = {
+		time_start:0,
+		time_end:(16500) * (100),
+		from:-30.0,
+		to:270.0,
+		target:&rotTarget,
+		interpolator:&gSineInterpolator,
+	};
+
+	static struct Timeline timeline = {
+	};
+
+	if (!lastVsyncTime) {
+		timeline.animations.push_back(&xAnimation);
+		timeline.animations.push_back(&yAnimation);
+		timeline.animations.push_back(&rotAnimation);
+	};
+
+	timeline.tick(vsyncEstimator.predict(thisVsyncTime));
+
+	lastVsyncTime = thisVsyncTime;
 
 	#ifdef ANDROID
 	//XXX: no input yet. add some motion
