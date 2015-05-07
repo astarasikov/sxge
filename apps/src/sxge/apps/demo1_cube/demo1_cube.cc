@@ -15,6 +15,8 @@
 
 #include <math.h>
 
+#define OBJ_MDL_PATH (SXGE_TOPDIR "/3rdparty/res/mdl/cat.obj")
+
 #define SHADER_PATH(name) (SXGE_TOPDIR "/shaders/" name)
 #ifdef SXGE_USE_OPENGL
 	#define VTX_SHADER "light_gl3.vert"
@@ -493,15 +495,16 @@ void Demo1_Cube::drawObject(sxge::Object *object) {
 }
 
 void Demo1_Cube::initScene(void) {
-	auto cube1 = new sxge::Object();
-	cube1->model = sxge::Model::cube(0.3);
-	#ifndef ANDROID
-	cube1->texture = new sxge::Texture(SXGE_TOPDIR "/res/tex1.dat", 256, 256);
-	#endif
+	auto obj1 = new sxge::Object();
+	obj1->model = sxge::Model::loadObj(OBJ_MDL_PATH);
+	if (!obj1->model) {
+		sxge_errs("failed to load Obj model");
+		obj1->model = sxge::Model::cube(0.3);
+	}
 
-	auto cube2 = new sxge::Object();
-	cube2->model = sxge::Model::cube(1.0);
-	cube2->texture = cube1->texture;
+	#ifndef ANDROID
+	obj1->texture = new sxge::Texture(SXGE_TOPDIR "/res/tex1.dat", 256, 256);
+	#endif
 
 	auto rX = vmath::mat3f::rotateX(sxge::degToRad(25.0f));
 	auto rZ = vmath::mat3f::rotateZ(sxge::degToRad(40.0f));
@@ -512,11 +515,21 @@ void Demo1_Cube::initScene(void) {
 	auto rot4 = vmath::mat4f(rXrZ);
 	auto transform = rot4 * translated;
 
-	cube1->transform = new vmath::mat4f(transform);
+	obj1->transform = new vmath::mat4f(transform);
 
 	mScene = new sxge::Scene();
-	mScene->add(cube1);
-	mScene->add(cube2);
+	mScene->add(obj1);
+
+	{
+		auto obj2 = new sxge::Object();
+		obj2->model = sxge::Model::cube(0.2);
+		obj2->texture = obj1->texture;
+
+		auto o2_translate = vmath::vec3f(0.2, 0.9, 0.0);
+		auto o2_translate_mtx = vmath::mat4f(o2_translate);
+		obj2->transform = new vmath::mat4f(o2_translate_mtx);
+		mScene->add(obj2);
+	}
 }
 
 void Demo1_Cube::drawScene() {
