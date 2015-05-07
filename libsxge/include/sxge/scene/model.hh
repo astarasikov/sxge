@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <sxge/math/vmath.hh>
 
+#include <tiny_obj_loader/tiny_obj_loader.h>
+
 namespace sxge {
 
 class Model {
@@ -130,8 +132,78 @@ public:
 		return texCoords != NULL;
 	}
 
-	static Model *loadObj() {
+	static Model *loadObj(const char *fpath) {
+		//XXX: write .obj loader, drop tiny_obj_loader
+
+		std::vector<tinyobj::shape_t> shapes;
+		std::vector<tinyobj::material_t> materials;
+
+		std::string err = tinyobj::LoadObj(shapes, materials, fpath, NULL);
+		if (!err.empty()) {
+			std::cerr << err << std::endl;
+			return NULL;
+		}
+
+		if (shapes.size() == 0) {
+			sxge_errs("no shapes loaded");
+			return NULL;
+		}
+
+		tinyobj::shape_t &shape = shapes[0];
+		tinyobj::mesh_t &mesh = shape.mesh;
+
+		size_t vtx_count = mesh.positions.size();
+		size_t idx_count = mesh.indices.size();
+		size_t tc_count = mesh.texcoords.size();
+		size_t vn_count = mesh.normals.size();
+
+		float *mvertices = nullptr;
+		unsigned *mindices = nullptr;
+		float *mtexcoords = nullptr;
+		float *mnormals = nullptr;
+
+		if (!vtx_count) {
+			std::cerr << "no vertices in the model" << std::endl;
+			return NULL;
+		}
+
 		Model *mdl = new Model();
+
+		mvertices = new float[vtx_count];
+		std::copy(mesh.positions.begin(), mesh.positions.end(), mvertices);
+		mdl->vertices = mvertices;
+		mdl->vtxStride = 3;
+		mdl->nVertices = vtx_count;
+
+		if (idx_count) {
+			mindices = new unsigned[idx_count];
+			std::copy(mesh.indices.begin(), mesh.indices.end(), mindices);
+			mdl->indices = mindices;
+			mdl->nIndices = idx_count;
+		}
+
+		if (tc_count) {
+			if (tc_count != idx_count) {
+				std::cerr << "texcoord count " << tc_count
+					<< " != " << idx_count << std::endl;
+				//return NULL;
+			}
+			mtexcoords = new float[tc_count];
+			std::copy(mesh.texcoords.begin(), mesh.texcoords.end(), mtexcoords);
+			mdl->texCoords = mtexcoords;
+			mdl->texStride = 3;
+		}
+
+		if (vn_count) {
+			if (vn_count != idx_count) {
+				std::cerr << "normal count " << vn_count
+					<< " != " << idx_count << std::endl;
+				//return NULL;
+			}
+			mnormals = new float[vn_count];
+			std::copy(mesh.normals.begin(), mesh.normals.end(), mnormals);
+			mdl->vertexNormals = mnormals;
+		}
 
 		return mdl;
 	}
