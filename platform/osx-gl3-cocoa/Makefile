@@ -2,8 +2,13 @@ APPNAME=sxge
 CC=clang
 CXX=clang++
 SXGE_TOPDIR=$(shell pwd)/../..
-DEFINES=-DSXGE_USE_OPENGL -DSXGE_TOPDIR=\"$(SXGE_TOPDIR)\" -I$(SXGE_TOPDIR)/libsxge/include -I$(SXGE_TOPDIR)/apps/include -I$(shell pwd)/include
-WOPTS=-Wall -Wpedantic
+DEFINES=-DSXGE_USE_OPENGL \
+		-DSXGE_TOPDIR=\"$(SXGE_TOPDIR)\" \
+		-I$(SXGE_TOPDIR)/libsxge/include \
+		-I$(SXGE_TOPDIR)/apps/include \
+		-I$(SXGE_TOPDIR)/3rdparty/include \
+		-I$(shell pwd)/include
+WOPTS=-Wall -Wpedantic -Wc99-extensions
 OPTIMIZATION_FLAGS=-pg -O0
 
 LDFLAGS=-framework Cocoa \
@@ -32,7 +37,8 @@ MM_FILES = \
 	opengl_view.mm
 
 CC_FILES = \
-	$(SXGE_TOPDIR)/apps/src/sxge/apps/demo1_cube/demo1_cube.cc
+	$(SXGE_TOPDIR)/apps/src/sxge/apps/demo1_cube/demo1_cube.cc \
+	$(SXGE_TOPDIR)/3rdparty/src/tiny_obj_loader/tiny_obj_loader.cc
 
 C_FILES = \
 	$(SXGE_TOPDIR)/libsxge/src/sxge/util/log.c \
