@@ -24,4 +24,5 @@ void main(void)
 	float blinn = max(0.0, dot(ref, ev));
 
 	vert_color = vec4(blinn, blinn, blinn, 1.0);
+	//vert_color = position;
 }

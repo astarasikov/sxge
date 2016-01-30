@@ -9,9 +9,9 @@ void main(void)
 {
 	vec2 tc_t = vert_texcoord;
 	float mag = dot(tc_t, tc_t);
-	float coef = (mag - 0.25) * -4;
+	float coef = (mag - 0.25);
 	vec4 tex_col = texture(sTexture, vert_texcoord);
 
-	//out_color = mix(tex_col, vert_color, coef * coef);
-	out_color = tex_col;
+	out_color = mix(tex_col, vert_color, coef * coef);
+	//out_color = tex_col;
 }
