@@ -13,7 +13,7 @@ sxge_log(enum sxge_log_level level, const char *format, ...)
 	va_list args;
 	(void)level;
 	va_start(args, format);
-	int count = vsnprintf(buf, SXGE_LOG_SIZE, format, args);
+	size_t count = vsnprintf(buf, SXGE_LOG_SIZE, format, args);
 	va_end(args);
 
 	if (count >= 0 && count < SXGE_LOG_SIZE) {
