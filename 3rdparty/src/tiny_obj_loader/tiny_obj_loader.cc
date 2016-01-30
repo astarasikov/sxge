@@ -190,10 +190,19 @@ updateVertex(
     normals.push_back(in_normals[3*i.vn_idx+1]);
     normals.push_back(in_normals[3*i.vn_idx+2]);
   }
+  else {
+	normals.push_back(0.0f);
+	normals.push_back(0.0f);
+	normals.push_back(0.0f);
+  }
 
   if (i.vt_idx >= 0) {
     texcoords.push_back(in_texcoords[2*i.vt_idx+0]);
     texcoords.push_back(in_texcoords[2*i.vt_idx+1]);
+  }
+  else {
+	texcoords.push_back(0.0f);
+	texcoords.push_back(0.0f);
   }
 
   unsigned int idx = positions.size() / 3 - 1;
@@ -289,7 +298,7 @@ std::string LoadMtl (
 
   material_t material;
   
-  int maxchars = 8192;  // Alloc enough size.
+  static const size_t maxchars = 8192;  // Alloc enough size.
   std::vector<char> buf(maxchars);  // Alloc enough size.
   while (inStream.peek() != -1) {
     inStream.getline(&buf[0], maxchars);
