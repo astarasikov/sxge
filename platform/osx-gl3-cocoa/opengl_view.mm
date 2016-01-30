@@ -19,6 +19,7 @@ static CVReturn displayCallback(CVDisplayLinkRef displayLink,
 {
 	self = [super initWithFrame:frameRect pixelFormat:format];
 	[self registerDisplayLink];
+	[self setWantsBestResolutionOpenGLSurface:YES];
 	return self;
 }
 

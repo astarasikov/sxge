@@ -111,7 +111,7 @@
 		done = 1;
 	}
 
-	screen_->reshape(self.frame.size.width, self.frame.size.height);
+	screen_->reshape(2 * self.frame.size.width, 2 * self.frame.size.height);
 	screen_->display();
 
 	[context flushBuffer];
