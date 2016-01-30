@@ -166,6 +166,9 @@ public:
 			std::cerr << "no vertices in the model" << std::endl;
 			return NULL;
 		}
+		else {
+			std::cout << "Vertex count: " << vtx_count << std::endl;
+		}
 
 		Model *mdl = new Model();
 
@@ -183,21 +186,22 @@ public:
 		}
 
 		if (tc_count) {
-			if (tc_count != idx_count) {
+			if ((tc_count * 3 / 2) != vtx_count) {
 				std::cerr << "texcoord count " << tc_count
-					<< " != " << idx_count << std::endl;
+					<< " (" << ((tc_count) * 3 / 2) << ")"
+					<< " != " << vtx_count << std::endl;
 				//return NULL;
 			}
 			mtexcoords = new float[tc_count];
 			std::copy(mesh.texcoords.begin(), mesh.texcoords.end(), mtexcoords);
 			mdl->texCoords = mtexcoords;
-			mdl->texStride = 3;
+			mdl->texStride = 2;
 		}
 
 		if (vn_count) {
-			if (vn_count != idx_count) {
+			if (vn_count != vtx_count) {
 				std::cerr << "normal count " << vn_count
-					<< " != " << idx_count << std::endl;
+					<< " != " << vtx_count << std::endl;
 				//return NULL;
 			}
 			mnormals = new float[vn_count];
