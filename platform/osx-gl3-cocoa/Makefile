@@ -1,6 +1,10 @@
 APPNAME=sxge
 CC=clang
 CXX=clang++
+
+#CC=codelite-cc clang
+#CXX=codelite-cc clang++
+
 SXGE_TOPDIR=$(shell pwd)/../..
 DEFINES=-DSXGE_USE_OPENGL \
 		-DSXGE_TOPDIR=\"$(SXGE_TOPDIR)\" \
@@ -9,7 +13,10 @@ DEFINES=-DSXGE_USE_OPENGL \
 		-I$(SXGE_TOPDIR)/3rdparty/include \
 		-I$(shell pwd)/include
 WOPTS=-Wall -Wpedantic -Wc99-extensions
-OPTIMIZATION_FLAGS=-pg -O0
+OPTIMIZATION_FLAGS=-pg -O2
+
+WITH_SANITIZER=0
+LOCAL_LLVM_BUILD=/opt/my_clang/
 
 LDFLAGS=-framework Cocoa \
 	-framework CoreVideo \
@@ -21,8 +28,9 @@ LOCAL_LLVM_BUILD?=please_set_the_path_to_llvm
 CC=$(LOCAL_LLVM_BUILD)/bin/clang
 CXX=$(LOCAL_LLVM_BUILD)/bin/clang++
 DEFINES+=-I/Applications/Xcode.app/Contents//Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/c++/v1
+DEFINES+=-I/Applications/Xcode.app/Contents/Developer//Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/usr/include
 LDFLAGS+=-lLLVMInstrumentation -L$(LOCAL_LLVM_BUILD)/lib/
-LDFLAGS+=-L$(LOCAL_LLVM_BUILD)/lib/clang/3.6.0/lib/darwin/ -lclang_rt.asan_osx_dynamic -lc++ -lc++abi
+LDFLAGS+=-L$(LOCAL_LLVM_BUILD)/lib/clang/3.7.0/lib/darwin/ -lclang_rt.asan_osx_dynamic -lc++ -lc++abi
 LDFLAGS+=-Xlinker -rpath -Xlinker $(LOCAL_LLVM_BUILD)/lib
 WOPTS+=-fsanitize=address
 endif
