@@ -11,6 +11,10 @@
 namespace sxge {
 
 class Texture {
+	enum {
+		SZ_TGA_HDR = 44,
+	};
+
 public:
 	Texture(unsigned width, unsigned height, char *raw_data)
 		: textureID(-1U), isLoaded(false), width(width), height(height)
@@ -27,7 +31,12 @@ public:
 		: textureID(-1U), isLoaded(false), width(width), height(height)
 	{
 		sxge::FileLoader loader(filename);
-		init(loader.getData());
+		if (filename.find(".tga", 0) == -1) {
+			init(loader.getData());
+		}
+		else {
+			init((char*)loader.getData() + SZ_TGA_HDR);
+		}
 	}
 
 	virtual ~Texture() {
