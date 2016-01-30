@@ -132,25 +132,9 @@ public:
 		return texCoords != NULL;
 	}
 
-	static Model *loadObj(const char *fpath) {
-		//XXX: write .obj loader, drop tiny_obj_loader
-
-		std::vector<tinyobj::shape_t> shapes;
-		std::vector<tinyobj::material_t> materials;
-
-		std::string err = tinyobj::LoadObj(shapes, materials, fpath, NULL);
-		if (!err.empty()) {
-			std::cerr << err << std::endl;
-			return NULL;
-		}
-
-		if (shapes.size() == 0) {
-			sxge_errs("no shapes loaded");
-			return NULL;
-		}
-
-		tinyobj::shape_t &shape = shapes[0];
-		tinyobj::mesh_t &mesh = shape.mesh;
+	static Model *modelFromTinyObjShape(tinyobj::shape_t *shape)
+	{
+		tinyobj::mesh_t &mesh = shape->mesh;
 
 		size_t vtx_count = mesh.positions.size();
 		size_t idx_count = mesh.indices.size();
@@ -210,6 +194,48 @@ public:
 		}
 
 		return mdl;
+	}
+
+	static Model *loadObj(const char *fpath) {
+		//XXX: write .obj loader, drop tiny_obj_loader
+		std::vector<tinyobj::shape_t> shapes;
+		std::vector<tinyobj::material_t> materials;
+
+		std::string err = tinyobj::LoadObj(shapes, materials, fpath, NULL);
+		if (!err.empty()) {
+			std::cerr << err << std::endl;
+			return NULL;
+		}
+
+		if (shapes.size() == 0) {
+			sxge_errs("no shapes loaded");
+			return NULL;
+		}
+
+		return modelFromTinyObjShape(&shapes[0]);
+	}
+
+	static std::vector<Model*> loadObjModels(const char *fpath) {
+		std::vector<tinyobj::shape_t> shapes;
+		std::vector<tinyobj::material_t> materials;
+		std::vector<Model*> models;
+
+		std::string err = tinyobj::LoadObj(shapes, materials, fpath, NULL);
+		if (!err.empty()) {
+			std::cerr << err << std::endl;
+			return models;
+		}
+
+		if (shapes.size() == 0) {
+			sxge_errs("no shapes loaded");
+			return models;
+		}
+
+		for (tinyobj::shape_t& shape : shapes) {
+			models.push_back(modelFromTinyObjShape(&shape));
+		}
+
+		return models;
 	}
 
 	static Model *surface(float size) {

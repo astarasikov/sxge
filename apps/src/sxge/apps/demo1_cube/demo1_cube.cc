@@ -18,6 +18,8 @@
 #define OBJ_MDL_PATH (SXGE_TOPDIR "/3rdparty/res/mdl/cat.obj")
 #define OBJ_TEX_PATH (SXGE_TOPDIR "/3rdparty/res/mdl/cat_diff.tga")
 
+#define MULTIOBJ_MDL_PATH (SXGE_TOPDIR "/3rdparty/res/mdl/CHALLENGER71.obj")
+
 #define SHADER_PATH(name) (SXGE_TOPDIR "/shaders/" name)
 #ifdef SXGE_USE_OPENGL
 	#define VTX_SHADER "light_gl3.vert"
@@ -547,6 +549,14 @@ void Demo1_Cube::initScene(void) {
 		auto o2_translate_mtx = vmath::mat4f(o2_translate);
 		obj2->transform = new vmath::mat4f(o2_translate_mtx);
 		mScene->add(obj2);
+	}
+
+	std::vector<sxge::Model*> multimodels = Model::loadObjModels(MULTIOBJ_MDL_PATH);
+	for (auto mdl : multimodels) {
+		auto obj = new sxge::Object();
+		obj->transform = obj1->transform;
+		obj->model = mdl;
+		mScene->add(obj);
 	}
 }
 
