@@ -16,6 +16,7 @@
 #include <math.h>
 
 #define OBJ_MDL_PATH (SXGE_TOPDIR "/3rdparty/res/mdl/cat.obj")
+#define OBJ_TEX_PATH (SXGE_TOPDIR "/3rdparty/res/mdl/cat_diff.tga")
 
 #define SHADER_PATH(name) (SXGE_TOPDIR "/shaders/" name)
 #ifdef SXGE_USE_OPENGL
@@ -101,6 +102,7 @@ void gl_check(void) {
 		case GL_OUT_OF_MEMORY:
 		sxge_infos("OOM");
 		break;
+		default:break;
 	}
 }
 
@@ -228,6 +230,18 @@ void Demo1_Cube::keyEvent(char key, SpecialKey sk, KeyStatus ks) {
 			break;
 	}
 	switch (key) {
+		case 'h':
+			mOX -= dt;
+			break;
+		case 'j':
+			mOY += dt;
+			break;
+		case 'k':
+			mOY -= dt;
+			break;
+		case 'l':
+			mOX += dt;
+			break;
 		case 'x':
 			mRX = ((mRX - 1) % -360);
 			break;
@@ -245,6 +259,8 @@ void Demo1_Cube::keyEvent(char key, SpecialKey sk, KeyStatus ks) {
 			break;
 		case 'Z':
 			mRZ = ((mRZ + 1) % -360);
+			break;
+		default:
 			break;
 	}
 }
@@ -270,9 +286,11 @@ void Demo1_Cube::display(void) {
 	ogl(glClearColor(1.0, 1.0, 1.0, 1.0));
 	assert(mShaderProg->bind());
 
+#if 0
 	mOX = gOX;
 	mOY = gOY;
 	mRY = gRY;
+#endif
 
 	drawScene();
 
@@ -479,13 +497,14 @@ void Demo1_Cube::drawModel(sxge::Model *model, sxge::Texture *texture) {
 void Demo1_Cube::drawObject(sxge::Object *object) {
 	if (object->transform) {
 		vmath::mat4f &pv = *mProjView;
-		vmath::mat4f &xform = *(object->transform);
-		auto mvp = pv * xform;
+		//vmath::mat4f &xform = *(object->transform);
+		//auto mvp = pv * xform;
 		//auto mvp = xform * pv;
-		ogl(glUniformMatrix4fv(mMVPAttr, 1, GL_FALSE, mvp.getData()));
+		auto mvp = pv;
+		ogl(glUniformMatrix4fv(mMVPAttr, 1, GL_TRUE, mvp.getData()));
 	}
 	else {
-		ogl(glUniformMatrix4fv(mMVPAttr, 1, GL_FALSE, mProjView->getData()));
+		ogl(glUniformMatrix4fv(mMVPAttr, 1, GL_TRUE, mProjView->getData()));
 	}
 
 	ogl(glUniform3f(mEyeUniform, 0, 0, 1));
@@ -503,13 +522,13 @@ void Demo1_Cube::initScene(void) {
 	}
 
 	#ifndef ANDROID
-	obj1->texture = new sxge::Texture(SXGE_TOPDIR "/res/tex1.dat", 256, 256);
+	obj1->texture = new sxge::Texture(OBJ_TEX_PATH, 512, 1024);
 	#endif
 
 	auto rX = vmath::mat3f::rotateX(sxge::degToRad(25.0f));
 	auto rZ = vmath::mat3f::rotateZ(sxge::degToRad(40.0f));
 	auto rXrZ = rZ * rX;
-	auto translate = vmath::vec3f(2.0, 1.5, 0.4);
+	auto translate = vmath::vec3f(2.0, 1.5, 0.2);
 	auto scale3 = vmath::mat3f::scale(1, 1, 1);
 	auto translated = vmath::mat4f(scale3, translate);
 	auto rot4 = vmath::mat4f(rXrZ);
@@ -519,13 +538,12 @@ void Demo1_Cube::initScene(void) {
 
 	mScene = new sxge::Scene();
 	mScene->add(obj1);
-
 	{
 		auto obj2 = new sxge::Object();
 		obj2->model = sxge::Model::cube(0.2);
-		obj2->texture = obj1->texture;
+		//obj2->texture = new sxge::Texture(SXGE_TOPDIR "/res/tex1.dat", 256, 256);
 
-		auto o2_translate = vmath::vec3f(0.2, 0.9, 0.0);
+		auto o2_translate = vmath::vec3f(0.0, 0.0, 0.0);
 		auto o2_translate_mtx = vmath::mat4f(o2_translate);
 		obj2->transform = new vmath::mat4f(o2_translate_mtx);
 		mScene->add(obj2);
@@ -533,8 +551,8 @@ void Demo1_Cube::initScene(void) {
 }
 
 void Demo1_Cube::drawScene() {
-	double aspect = (double)mWidth / mHeight;
-	auto proj = vmath::mat4f::projection(45.0, aspect, 1, 100);
+	float aspect = (float)mWidth / mHeight;
+	auto proj = vmath::mat4f::projection(45.0, aspect, 1, 1000);
 	auto view = mCamera->getMatrix();
 
 	//Transformation matrix -- FIXME: add picker to rotate
