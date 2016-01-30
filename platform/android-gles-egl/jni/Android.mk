@@ -3,6 +3,7 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 APP_OPTIM := debug
+SXGE_TOPDIR := ../../../
 
 LOCAL_MODULE    := libsxge_jni
 LOCAL_CFLAGS    := -std=c++11 -g -ggdb -O0 -Wall \
@@ -12,7 +13,12 @@ LOCAL_CFLAGS    := -std=c++11 -g -ggdb -O0 -Wall \
 	-I../../apps/include
 
 LOCAL_SRC_FILES := gl_code.cpp \
-	../../../apps/src/sxge/apps/demo1_cube/demo1_cube.cc
+	$(SXGE_TOPDIR)/apps/src/sxge/apps/demo1_cube/demo1_cube.cc \
+	$(SXGE_TOPDIR)/3rdparty/src/tiny_obj_loader/tiny_obj_loader.cc \
+	$(SXGE_TOPDIR)/libsxge/src/sxge/opengl/program.cc \
+	$(SXGE_TOPDIR)/libsxge/src/sxge/opengl/shader.cc \
+	$(SXGE_TOPDIR)/libsxge/src/sxge/opengl/texture.cc \
+	$(SXGE_TOPDIR)/libsxge/src/sxge/scene/model.cc
 
 LOCAL_LDLIBS    := -llog -lGLESv2 -lEGL
 

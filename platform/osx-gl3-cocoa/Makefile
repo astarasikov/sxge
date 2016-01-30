@@ -46,7 +46,11 @@ MM_FILES = \
 
 CC_FILES = \
 	$(SXGE_TOPDIR)/apps/src/sxge/apps/demo1_cube/demo1_cube.cc \
-	$(SXGE_TOPDIR)/3rdparty/src/tiny_obj_loader/tiny_obj_loader.cc
+	$(SXGE_TOPDIR)/3rdparty/src/tiny_obj_loader/tiny_obj_loader.cc \
+	$(SXGE_TOPDIR)/libsxge/src/sxge/opengl/program.cc \
+	$(SXGE_TOPDIR)/libsxge/src/sxge/opengl/shader.cc \
+	$(SXGE_TOPDIR)/libsxge/src/sxge/opengl/texture.cc \
+	$(SXGE_TOPDIR)/libsxge/src/sxge/scene/model.cc
 
 C_FILES = \
 	$(SXGE_TOPDIR)/libsxge/src/sxge/util/log.c \
