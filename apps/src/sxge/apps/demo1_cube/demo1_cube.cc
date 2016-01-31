@@ -63,12 +63,8 @@
 
 namespace sxge {
 
-static float gOX = -1.0;
-static float gOY = -0.5;
-static float gRY = 30.0;
-
 #include <sys/time.h>
-anitime_t wall_time(void)
+anitime_t AnimationWallTime(void)
 {
 	timeval t;
 	gettimeofday(&t, NULL);
@@ -130,6 +126,7 @@ Demo1_Cube::Demo1_Cube() :
 	mVbo(GL_INVALID_INDEX),
 	mIndexVbo(GL_INVALID_INDEX)
 {
+	mVsyncEstimator = (struct VsyncEstimator){};
 }
 
 Demo1_Cube::~Demo1_Cube() {
@@ -142,7 +139,7 @@ void Demo1_Cube::init(void) {
 	initScene();
 	printGLInfo();
 	mShaderProg = new sxge::ShaderProgram();
-	#ifndef ANDROID
+	#if 1//ndef ANDROID
 	mShaderProg->addShaderFromFile(sxge::Shader::Vertex,
 		SHADER_PATH(VTX_SHADER));
 	mShaderProg->addShaderFromFile(sxge::Shader::Fragment,
@@ -199,7 +196,84 @@ void Demo1_Cube::init(void) {
 	ogl(glBindVertexArray(mVao));
 	ogl(glGenBuffers(1, &mVbo));
 	ogl(glGenBuffers(1, &mIndexVbo));
+
+	animationInit();
 }
+
+struct Demo1_Cube::AnimationSetup {
+	FloatAnimationTarget mXTarget;
+	Animation mXAnimation;
+
+	FloatAnimationTarget mYTarget;
+	Animation mYAnimation;
+
+	IntAnimationTarget mRotTarget;
+	Animation mRotAnimation;
+
+	Timeline mTimeline;
+
+	AnimationSetup(Demo1_Cube *ptr)
+		:
+			mXTarget(FloatAnimationTarget(ptr->mOX)),
+			mYTarget(FloatAnimationTarget(ptr->mOY)),
+			mRotTarget(IntAnimationTarget(ptr->mRY)),
+			mTimeline(Timeline())
+	{
+		const size_t ANIM_DURATION = (165ull) * 100ull * 1000ull;
+
+		mXAnimation = {
+			.time_start = 0,
+			.time_end = ANIM_DURATION,
+			.from = -1.0,
+			.to = 1.0,
+			.target = &mXTarget,
+			.interpolator = &gEaseOutBounceInterpolator,
+			//interpolator:&gLinearInterpolator,
+		};
+		mYAnimation = {
+			.time_start = 0,
+			.time_end = ANIM_DURATION,
+			.from = -0.5,
+			.to = 0.5,
+			.target = &mYTarget,
+			.interpolator = &gSineInterpolator,
+		};
+		mRotAnimation = {
+			.time_start = 0,
+			.time_end = ANIM_DURATION,
+			.from = -30.0,
+			.to = 270.0,
+			.target = &mRotTarget,
+			.interpolator = &gSineInterpolator,
+		};
+
+		mTimeline.animations.push_back(&mXAnimation);
+		mTimeline.animations.push_back(&mYAnimation);
+		mTimeline.animations.push_back(&mRotAnimation);
+	}
+};
+
+void Demo1_Cube::animationInit(void)
+{
+	mAnimationSetup = new AnimationSetup(this);
+}
+
+void Demo1_Cube::animationTick(void)
+{
+	static anitime_t lastVsyncTime = 0;
+	anitime_t thisVsyncTime = AnimationWallTime();
+	anitime_t dt = thisVsyncTime - lastVsyncTime;
+
+	mAnimationSetup->mTimeline.tick(mVsyncEstimator.predict(thisVsyncTime));
+
+	lastVsyncTime = thisVsyncTime;
+
+	#ifdef ANDROID
+	//XXX: no input yet. add some motion
+	mRX = ((mRX - 1) % -360);
+	#endif
+}
+
 
 void Demo1_Cube::keyEvent(char key, SpecialKey sk, KeyStatus ks) {
 	//FIXME: add proper camera, models, scene etc
@@ -288,91 +362,8 @@ void Demo1_Cube::display(void) {
 	ogl(glClearColor(1.0, 1.0, 1.0, 1.0));
 	assert(mShaderProg->bind());
 
-#if 0
-	mOX = gOX;
-	mOY = gOY;
-	mRY = gRY;
-#endif
-
 	drawScene();
-
-	static anitime_t lastVsyncTime = 0;
-	anitime_t thisVsyncTime = wall_time();
-	anitime_t dt = thisVsyncTime - lastVsyncTime;
-
-	const size_t ANIM_DURATION = (16500ull) * 100ull * 100ull;
-
-	/**************************************************************************
-	 * Animate X
-	 *************************************************************************/
-	static struct sxTarget : AnimationTarget {
-		virtual void set(float value) {
-			gOX = value;
-		}
-	} xTarget;
-
-	static struct Animation xAnimation = {
-		time_start:0,
-		time_end:ANIM_DURATION,
-		from:-1.0,
-		to:1.0,
-		target:&xTarget,
-		interpolator:&gEaseOutBounceInterpolator,
-		//interpolator:&gLinearInterpolator,
-	};
-	/**************************************************************************
-	 * Animate Y
-	 *************************************************************************/
-	static struct syTarget : AnimationTarget {
-		virtual void set(float value) {
-			gOY = value;
-		}
-	} yTarget;
-
-	static struct Animation yAnimation = {
-		time_start:0,
-		time_end:ANIM_DURATION,
-		from:-0.5,
-		to:0.5,
-		target:&yTarget,
-		interpolator:&gSineInterpolator,
-	};
-
-	/**************************************************************************
-	 * Animate Rotation
-	 *************************************************************************/
-	static struct srotTarget : AnimationTarget {
-		virtual void set(float value) {
-			gRY = value;
-		}
-	} rotTarget;
-
-	static struct Animation rotAnimation = {
-		time_start:0,
-		time_end:ANIM_DURATION,
-		from:-30.0,
-		to:270.0,
-		target:&rotTarget,
-		interpolator:&gSineInterpolator,
-	};
-
-	static struct Timeline timeline = {
-	};
-
-	if (!lastVsyncTime) {
-		timeline.animations.push_back(&xAnimation);
-		timeline.animations.push_back(&yAnimation);
-		timeline.animations.push_back(&rotAnimation);
-	};
-
-	timeline.tick(vsyncEstimator.predict(thisVsyncTime));
-
-	lastVsyncTime = thisVsyncTime;
-
-	#ifdef ANDROID
-	//XXX: no input yet. add some motion
-	mRX = ((mRX - 1) % -360);
-	#endif
+	animationTick();
 }
 
 void Demo1_Cube::reshape(unsigned width, unsigned height) {
@@ -523,7 +514,7 @@ void Demo1_Cube::initScene(void) {
 		obj1->model = sxge::Model::cube(0.3);
 	}
 
-	#ifndef ANDROID
+	#if 1//ndef ANDROID
 	obj1->texture = new sxge::Texture(OBJ_TEX_PATH, 512, 1024);
 	#endif
 
@@ -543,7 +534,7 @@ void Demo1_Cube::initScene(void) {
 	{
 		auto obj2 = new sxge::Object();
 		obj2->model = sxge::Model::cube(0.2);
-		//obj2->texture = new sxge::Texture(SXGE_TOPDIR "/res/tex1.dat", 256, 256);
+		obj2->texture = new sxge::Texture(SXGE_TOPDIR "/res/tex1.dat", 256, 256);
 
 		auto o2_translate = vmath::vec3f(0.0, 0.0, 0.0);
 		auto o2_translate_mtx = vmath::mat4f(o2_translate);

@@ -2,11 +2,13 @@
 #define __SXGE_SCENE_ANIMATION_HH__
 
 #include <algorithm>
+#include <vector>
+#include <sxge/math/utils.hh>
 
 namespace sxge {
 
 typedef long long anitime_t;
-extern anitime_t wall_time(void);
+extern anitime_t AnimationWallTime(void);
 
 struct AnimationTarget {
 	virtual void set(float value) = 0;
@@ -37,11 +39,12 @@ struct Timeline {
 
 	void tick(anitime_t time) {
 		if (!time_start) {
-			time_start = wall_time();
+			time_start = AnimationWallTime();
 		}
 
 		for (auto *a : animations) {
-			if (!a->interpolator || !a->target) {
+			if ((!a->interpolator) || (!a->target))
+			{
 				continue;
 			}
 
@@ -66,8 +69,8 @@ struct Timeline {
 		}
 	}
 };
-	
-static struct {
+
+struct VsyncEstimator {
 	enum {
 		vsync_buf_size = 3,
 	};
@@ -84,7 +87,7 @@ static struct {
 		}
 		return tmp / vsync_buf_size;
 	};
-} vsyncEstimator;
+};
 
 /******************************************************************************
  * Some interpolators
@@ -119,6 +122,23 @@ static struct EaseOutBounceInterpolator : Interpolator {
 	}
 } gEaseOutBounceInterpolator;
 
+struct IntAnimationTarget : AnimationTarget {
+	int &target;
+	IntAnimationTarget(int &ptr) : target(ptr) {}
+
+	virtual void set(float value) {
+		target = value;
+	}
+};
+
+struct FloatAnimationTarget : AnimationTarget {
+	float &target;
+	FloatAnimationTarget(float &ptr) : target(ptr) {}
+
+	virtual void set(float value) {
+		target = value;
+	}
+};
 
 } //namespace sxge
 

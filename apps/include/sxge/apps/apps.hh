@@ -4,6 +4,7 @@
 #include <sxge/opengl/screen.hh>
 #include <sxge/opengl/program.hh>
 #include <sxge/opengl/shader.hh>
+#include <sxge/scene/animation.hh>
 #include <sxge/scene/camera.hh>
 #include <sxge/scene/model.hh>
 #include <sxge/scene/scene.hh>
@@ -11,6 +12,8 @@
 namespace sxge {
 
 class Demo1_Cube : public sxge::Screen {
+struct AnimationSetup;
+
 public:
 	Demo1_Cube();
 	virtual ~Demo1_Cube();
@@ -24,6 +27,9 @@ protected:
 	void drawObject(sxge::Object *object);
 	void initScene(void);
 	void drawScene();
+
+	void animationInit(void);
+	void animationTick(void);
 
 	sxge::ShaderProgram *mShaderProg;
 	sxge::Camera *mCamera;
@@ -53,6 +59,8 @@ protected:
 	GLuint mVbo;
 	GLuint mIndexVbo;
 
+	AnimationSetup *mAnimationSetup;
+	VsyncEstimator mVsyncEstimator;
 };
 
 } //namespace sxge
