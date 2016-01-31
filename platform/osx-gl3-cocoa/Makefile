@@ -12,7 +12,7 @@ DEFINES=-DSXGE_USE_OPENGL \
 		-I$(SXGE_TOPDIR)/apps/include \
 		-I$(SXGE_TOPDIR)/3rdparty/include \
 		-I$(shell pwd)/include
-WOPTS=-Wall -Wpedantic -Wc99-extensions
+WOPTS=-Wall -Wpedantic -Wno-c99-extensions
 OPTIMIZATION_FLAGS=-pg -O2
 
 WITH_SANITIZER=0

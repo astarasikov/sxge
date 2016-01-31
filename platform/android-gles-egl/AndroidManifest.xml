@@ -17,4 +17,5 @@
     </application>
     <uses-feature android:glEsVersion="0x00020000"/>
     <uses-sdk android:minSdkVersion="14"/>
+	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"></uses-permission>
 </manifest>

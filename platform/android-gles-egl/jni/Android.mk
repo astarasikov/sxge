@@ -7,10 +7,11 @@ SXGE_TOPDIR := ../../../
 
 LOCAL_MODULE    := libsxge_jni
 LOCAL_CFLAGS    := -std=c++11 -g -ggdb -O0 -Wall \
-	-DSXGE_TOPDIR=\"/sdcard/\" \
+	-DSXGE_TOPDIR=\"/sdcard/sxge\" \
 	-Ijni/include \
 	-I../../libsxge/include \
-	-I../../apps/include
+	-I../../apps/include \
+	-I../../3rdparty/include
 
 LOCAL_SRC_FILES := gl_code.cpp \
 	$(SXGE_TOPDIR)/apps/src/sxge/apps/demo1_cube/demo1_cube.cc \
